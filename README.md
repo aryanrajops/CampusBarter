@@ -15,6 +15,11 @@ The platform operates on a closed, self-balancing **Karma Economy** with strict 
 - 📤 **Upload Verified PYQ Paper:** `+25 Karma` per published paper.
 - 📥 **Download Exam Paper:** `-15 Karma` deducted (balances the economy and prevents freeloading).
 
+### 🔒 Robust Authentication & Account Security
+- **Strict Credential Validation:** Every login request verifies the credentials against registered accounts. Random, incorrect, or empty passwords are strictly rejected.
+- **2-Stage OTP Password Reset:** Resetting forgotten passwords enforces a 2-stage verification flow: email identity verification followed by a 6-digit cryptographic One-Time Passcode (OTP) challenge with a 5-minute expiry token and brute-force attempt limiter.
+- **In-Profile Security:** Password changes inside the student profile strictly require entering and verifying the `Current Password`.
+
 ---
 
 ## 🛠️ Tech Stack & Architecture

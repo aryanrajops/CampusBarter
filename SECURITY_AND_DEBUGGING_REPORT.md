@@ -53,6 +53,15 @@ flowchart LR
   - Logging out immediately redirects directly to `login.html#login`.
   - Dropdown "Create Another Account" redirects directly to `login.html#signup`.
 
+### Flow 1.1: Password Reset & 2-Stage OTP Verification System
+- **Strict Password Validation:** Login strictly checks input against stored/cloud password hashes. Any mismatched, partial, or arbitrary text is rejected with an inline error tooltip and auditory notification.
+- **Unauthorized Reset Prevention:** Previously, knowing an email allowed resetting its password directly. Now, a strict **2-Stage Verification Flow** is enforced:
+  1. **Stage 1 (Identity Check):** The system checks if the email is registered in `cb_accounts`/Supabase. Unregistered emails are rejected.
+  2. **Stage 2 (6-Digit OTP Challenge):** Generates a 6-digit cryptographic OTP token with a 5-minute expiry timestamp and a 5-attempt brute-force protection limiter.
+  3. **Verification Enforcement:** The password can only be updated if the user enters the exact matching 6-digit OTP code and matching confirmation passwords.
+  4. **Single-Use Token Destruction:** Immediately upon a successful reset, the OTP token is destroyed to prevent replay attacks.
+- **In-Profile Re-Authentication:** Inside `index.html` (Edit Profile), changing the account password strictly requires providing the `Current Password` before allowing any changes.
+
 ### Flow 2: Peer Barter Directory
 - **Department Filtering:** Tested filtering by "Computer Science", "Information Technology", "Data Science & AI", and "ALL". Cards filter dynamically.
 - **Self-Identity Badge:** When logged in, your own profile card displays an emerald `"You"` badge and `"Edit My Profile & Skills"` button, while peers display `"Barter Skills"`.
