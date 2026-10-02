@@ -997,10 +997,10 @@ function renderNavbarAuth() {
   const user = STATE.currentUser;
 
   if (!user) {
-    // Logged Out / Guest Mode: Show Clean Log In & Sign Up buttons linking to login.html
+    // Logged Out / Guest Mode: Show Clean Log In on mobile, Sign Up on sm+ screens (Sign Up is in mobile drawer)
     container.innerHTML = `
-      <a href="login.html#login" class="btn-glass text-xs px-3.5 py-2 rounded-xl font-medium transition-all hover:text-white">Log In</a>
-      <a href="login.html#signup" class="btn-emerald text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/25">
+      <a href="login.html#login" class="btn-glass text-xs px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-medium transition-all hover:text-white">Log In</a>
+      <a href="login.html#signup" class="hidden sm:inline-flex btn-emerald text-xs px-4 py-2 rounded-xl font-bold items-center gap-1.5 shadow-lg shadow-emerald-500/25">
         <i class="fa-solid fa-sparkles"></i> Sign Up (+300 Karma)
       </a>
     `;

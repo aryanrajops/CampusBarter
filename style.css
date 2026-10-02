@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    CampusBarter - Handcrafted Collegiate Design System
    Human-centric, accessible, authentic student exchange atmosphere
    ========================================================================== */
@@ -1173,4 +1173,32 @@ body.page-revealed .reveal-item {
   background: rgba(16, 185, 129, 0.12) !important;
   box-shadow: 0 0 25px rgba(16, 185, 129, 0.25) !important;
   transform: scale(1.01);
+}
+
+/* ==========================================================================
+   MOBILE VIEWPORT & FIT-TO-SCREEN DEFENSE
+   Prevents desktop zoom-out effect on smartphones (iPhone / Android)
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* 1. Hide massive 580px background orbs that push viewport horizontally */
+  .bg-ambient-orb {
+    display: none !important;
+  }
+
+  /* 2. Prevent cards and containers from exceeding mobile screen */
+  .glass-card, .glass-modal {
+    max-width: 100% !important;
+    word-break: break-word;
+  }
+
+  /* 3. Header and navbar fit constraints */
+  .glass-nav {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* 4. Filter tabs horizontal swipe smoothness */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
 }
