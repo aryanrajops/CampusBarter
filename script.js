@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CampusBarter - Frontend Logic, Auth System & Peer Barter Engine
  * Vanilla JavaScript with Supabase Cloud Database + LocalStorage State Persistence
  */
@@ -161,6 +161,21 @@ function getStoredAccounts() {
 
 function saveStoredAccounts(accounts) {
   localStorage.setItem("cb_accounts", JSON.stringify(accounts));
+}
+
+// =============================================================================
+// GUEST-FIRST ENFORCEMENT & STALE SESSION FLUSH (v2.1)
+// Guarantees all visiting users start as clean Guests with Log In / Sign Up buttons.
+// Automatically flushes any legacy auto-seeded session from previous test builds.
+// =============================================================================
+const APP_AUTH_VERSION = "cb_v2.1_guest_enforced";
+try {
+  if (localStorage.getItem("cb_auth_version") !== APP_AUTH_VERSION) {
+    localStorage.removeItem("cb_current_user");
+    localStorage.setItem("cb_auth_version", APP_AUTH_VERSION);
+  }
+} catch (e) {
+  console.warn("[CampusBarter Auth] Version check notice:", e);
 }
 
 function getStoredCurrentUser() {
@@ -526,10 +541,10 @@ const STATE = {
 
 function renderAiBadge(isAi, showReal = false) {
   if (isAi) {
-    return `<span class="badge-ai-bot" title="System-generated AI Mock Data"><i class="fa-solid fa-robot"></i> AI Bot</span>`;
+    return `<span class="badge-ai-bot shrink-0 whitespace-nowrap" title="System-generated AI Mock Data"><i class="fa-solid fa-robot"></i><span>AI Bot</span></span>`;
   }
   if (showReal) {
-    return `<span class="badge-real-user" title="Verified Real Student Account"><i class="fa-solid fa-circle-check"></i> Real User</span>`;
+    return `<span class="badge-real-user shrink-0 whitespace-nowrap" title="Verified Real Student Account"><i class="fa-solid fa-circle-check"></i><span>Real User</span></span>`;
   }
   return "";
 }
@@ -1555,10 +1570,10 @@ function renderActiveSwaps() {
   container.innerHTML = filteredSwaps.map(swap => {
     const stepperHtml = generateStepperHTML(swap.status);
     const statusPills = {
-      PENDING: '<span class="px-2.5 py-1 rounded-full text-xs font-semibold status-pill-pending"><i class="fa-solid fa-hourglass-half mr-1"></i> Pending</span>',
-      ACCEPTED: '<span class="px-2.5 py-1 rounded-full text-xs font-semibold status-pill-accepted"><i class="fa-solid fa-check mr-1"></i> Accepted</span>',
-      SCHEDULED: '<span class="px-2.5 py-1 rounded-full text-xs font-semibold status-pill-scheduled"><i class="fa-solid fa-calendar-days mr-1"></i> Scheduled</span>',
-      COMPLETED: '<span class="px-2.5 py-1 rounded-full text-xs font-semibold status-pill-completed"><i class="fa-solid fa-circle-check mr-1"></i> Completed</span>'
+      PENDING: '<span class="status-pill-pending"><i class="fa-solid fa-hourglass-half"></i><span>Pending</span></span>',
+      ACCEPTED: '<span class="status-pill-accepted"><i class="fa-solid fa-check"></i><span>Accepted</span></span>',
+      SCHEDULED: '<span class="status-pill-scheduled"><i class="fa-solid fa-calendar-days"></i><span>Scheduled</span></span>',
+      COMPLETED: '<span class="status-pill-completed"><i class="fa-solid fa-circle-check"></i><span>Completed</span></span>'
     };
 
     let actionButtonsHtml = "";
@@ -1608,29 +1623,29 @@ function renderActiveSwaps() {
     }
 
     return `
-      <div class="glass-card p-5 flex flex-col justify-between border-white/10 group">
+      <div class="glass-card p-4 sm:p-5 flex flex-col justify-between border-white/10 group">
         <div>
-          <div class="flex items-center justify-between gap-3 mb-4">
-            <div class="flex items-center gap-3">
-              <img src="${swap.peerAvatar}" class="w-11 h-11 rounded-2xl object-cover border border-white/20">
-              <div>
-                <div class="flex items-center gap-1.5">
-                  <h4 class="text-sm font-bold text-white">${escapeHTML(swap.peerName)}</h4>
+          <div class="flex items-start justify-between gap-2.5 mb-3.5">
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <img src="${swap.peerAvatar}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-white/20 shrink-0" alt="${escapeHTML(swap.peerName)}">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <h4 class="text-xs sm:text-sm font-bold text-white truncate max-w-[110px] xs:max-w-[140px] sm:max-w-none" title="${escapeHTML(swap.peerName)}">${escapeHTML(swap.peerName)}</h4>
                   ${renderAiBadge(swap.isAi)}
                 </div>
-                <p class="text-xs text-slate-400">${escapeHTML(swap.peerDepartment)} • ${escapeHTML(swap.peerSemester)}</p>
+                <p class="text-[11px] sm:text-xs text-slate-400 truncate">${escapeHTML(swap.peerDepartment)} • ${escapeHTML(swap.peerSemester)}</p>
               </div>
             </div>
-            <div>${statusPills[swap.status]}</div>
+            <div class="shrink-0 pt-0.5">${statusPills[swap.status]}</div>
           </div>
           <div class="space-y-2 mb-4 p-3 rounded-xl bg-white/5 border border-white/10">
             <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-chalkboard-user text-emerald-400"></i> ${escapeHTML(swap.peerName.split(" ")[0])} Teaches:</span>
-              <span class="font-semibold text-emerald-300">${escapeHTML(swap.peerTeaches)}</span>
+              <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-chalkboard-user text-emerald-400 shrink-0"></i> <span class="truncate">${escapeHTML(swap.peerName.split(" ")[0])} Teaches:</span></span>
+              <span class="font-semibold text-emerald-300 ml-2 text-right truncate">${escapeHTML(swap.peerTeaches)}</span>
             </div>
             <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 flex items-center gap-1.5"><i class="fa-solid fa-graduation-cap text-indigo-400"></i> You Teach:</span>
-              <span class="font-semibold text-indigo-300">${escapeHTML(swap.peerLearns)}</span>
+              <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-graduation-cap text-indigo-400 shrink-0"></i> <span class="truncate">You Teach:</span></span>
+              <span class="font-semibold text-indigo-300 ml-2 text-right truncate">${escapeHTML(swap.peerLearns)}</span>
             </div>
           </div>
           <div class="my-4">${stepperHtml}</div>
@@ -1762,23 +1777,23 @@ function renderPeerProfiles(departmentFilter = "ALL") {
     const isSelf = STATE.currentUser && (peer.id === STATE.currentUser.id || (peer.email && STATE.currentUser.email && peer.email.toLowerCase() === STATE.currentUser.email.toLowerCase()));
 
     return `
-      <div class="glass-card p-5 flex flex-col justify-between glass-card-hover ${isSelf ? 'border-indigo-500/50 bg-indigo-950/25 ring-1 ring-indigo-500/30' : 'border-white/10'} group">
+      <div class="glass-card p-4 sm:p-5 flex flex-col justify-between glass-card-hover ${isSelf ? 'border-indigo-500/50 bg-indigo-950/25 ring-1 ring-indigo-500/30' : 'border-white/10'} group">
         <div>
-          <div class="flex items-start justify-between gap-3 mb-3">
-            <div class="flex items-center gap-3">
-              <div class="relative">
-                <img src="${peer.avatar}" class="w-12 h-12 rounded-2xl object-cover border border-white/20">
-                <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900"></span>
+          <div class="flex items-start justify-between gap-2.5 mb-3">
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <div class="relative shrink-0">
+                <img src="${peer.avatar}" class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl object-cover border border-white/20">
+                <span class="absolute -bottom-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900"></span>
               </div>
-              <div>
+              <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <h3 class="text-base font-bold text-white font-heading">${escapeHTML(peer.name)}</h3>
-                  ${isSelf ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 shadow-sm"><i class="fa-solid fa-user-check mr-1"></i> You</span>' : renderAiBadge(peer.isAi)}
+                  <h3 class="text-sm sm:text-base font-bold text-white font-heading truncate max-w-[120px] xs:max-w-[150px] sm:max-w-none" title="${escapeHTML(peer.name)}">${escapeHTML(peer.name)}</h3>
+                  ${isSelf ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 shadow-sm shrink-0 whitespace-nowrap"><i class="fa-solid fa-user-check mr-1"></i> You</span>' : renderAiBadge(peer.isAi)}
                 </div>
-                <p class="text-xs text-slate-400">${escapeHTML(peer.department)} • ${escapeHTML(peer.semester)}</p>
+                <p class="text-[11px] sm:text-xs text-slate-400 truncate">${escapeHTML(peer.department)} • ${escapeHTML(peer.semester)}</p>
               </div>
             </div>
-            <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold">
+            <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold shrink-0">
               <i class="fa-solid fa-bolt text-amber-400"></i><span>${peer.karma}⚡</span>
             </div>
           </div>

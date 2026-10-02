@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
@@ -241,7 +241,7 @@
 
   <!-- Supabase JS Client & Dual-Mode Adapter -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js"></script>
+  <script src="supabase-client.js?v=2.1"></script>
 
   <!-- Standalone Login & Sign Up Logic with Creative Loader & Custom Validation -->
   <script>
@@ -638,9 +638,11 @@
           }
           loggedUser = typeof normalizeProfile === "function" ? normalizeProfile(localAcc) : localAcc;
           localStorage.setItem("cb_current_user", JSON.stringify(loggedUser));
+          localStorage.setItem("cb_auth_version", "cb_v2.1_guest_enforced");
         } else {
           loggedUser = typeof normalizeProfile === "function" ? normalizeProfile(loggedUser) : loggedUser;
           localStorage.setItem("cb_current_user", JSON.stringify(loggedUser));
+          localStorage.setItem("cb_auth_version", "cb_v2.1_guest_enforced");
         }
 
         // Step 2: Success Animation inside button
@@ -810,6 +812,7 @@
 
         newUser = typeof normalizeProfile === "function" ? normalizeProfile(newUser) : newUser;
         localStorage.setItem("cb_current_user", JSON.stringify(newUser));
+        localStorage.setItem("cb_auth_version", "cb_v2.1_guest_enforced");
 
         // Step 2: Success Feedback in button
         if (window.SoundFX) SoundFX.playSuccess();

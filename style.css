@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    CampusBarter - Handcrafted Collegiate Design System
    Human-centric, accessible, authentic student exchange atmosphere
    ========================================================================== */
@@ -206,10 +206,28 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 /* State Status Pills */
-.status-pill-pending { background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; }
-.status-pill-accepted { background: rgba(14, 165, 233, 0.14); border: 1px solid rgba(14, 165, 233, 0.35); color: #38bdf8; }
-.status-pill-scheduled { background: rgba(168, 85, 247, 0.14); border: 1px solid rgba(168, 85, 247, 0.35); color: #c084fc; }
-.status-pill-completed { background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; }
+.status-pill-pending,
+.status-pill-accepted,
+.status-pill-scheduled,
+.status-pill-completed {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  border-radius: 9999px !important;
+  padding: 0.28rem 0.65rem !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+}
+
+.status-pill-pending { background: rgba(245, 158, 11, 0.14) !important; border: 1px solid rgba(245, 158, 11, 0.35) !important; color: #fbbf24 !important; }
+.status-pill-accepted { background: rgba(14, 165, 233, 0.14) !important; border: 1px solid rgba(14, 165, 233, 0.35) !important; color: #38bdf8 !important; }
+.status-pill-scheduled { background: rgba(168, 85, 247, 0.14) !important; border: 1px solid rgba(168, 85, 247, 0.35) !important; color: #c084fc !important; }
+.status-pill-completed { background: rgba(16, 185, 129, 0.14) !important; border: 1px solid rgba(16, 185, 129, 0.35) !important; color: #34d399 !important; }
 
 /* Exam Type Badges */
 .badge-cia1 { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
@@ -465,32 +483,33 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
 /* AI Bot & Real Student Badges */
+.badge-ai-bot,
+.badge-real-user {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.28rem !important;
+  font-size: 0.65rem !important;
+  font-weight: 700 !important;
+  padding: 0.16rem 0.5rem !important;
+  border-radius: 9999px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.02em !important;
+  box-sizing: border-box !important;
+}
+
 .badge-ai-bot {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 9999px;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #d8b4fe;
-  letter-spacing: 0.02em;
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  color: #d8b4fe !important;
 }
 
 .badge-real-user {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 9999px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #6ee7b7;
-  letter-spacing: 0.02em;
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #6ee7b7 !important;
 }
 
 /* ==========================================================================
