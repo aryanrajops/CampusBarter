@@ -38,7 +38,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <!-- Custom Glassmorphism Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=2.1">
+  <link rel="stylesheet" href="style.css?v=2.2">
 
   <!-- Procedural Web Audio Sound Engine -->
   <script src="sound-fx.js"></script>
@@ -999,6 +999,75 @@
           <textarea id="edit-profile-bio" rows="2" placeholder="e.g. Passionate BSCIT student building full-stack applications. Eager to swap programming for advanced mathematics." class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 resize-none"></textarea>
         </div>
 
+        <!-- 7. ACCOUNT SECURITY: CHANGE PASSWORD -->
+        <div class="pt-3 border-t border-white/10">
+          <div class="flex items-center justify-between cursor-pointer py-1.5 px-2 rounded-xl hover:bg-white/5 transition-all group" id="toggle-change-password-btn">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <h4 class="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">Security &amp; Change Password</h4>
+                <p class="text-[10px] text-slate-400">Click to reveal password update form</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 text-xs text-indigo-400 group-hover:text-indigo-300">
+              <span id="change-pass-toggle-label" class="font-medium text-[11px]">Change Password</span>
+              <i id="change-pass-chevron" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200"></i>
+            </div>
+          </div>
+
+          <!-- Collapsible Password Container -->
+          <div id="change-password-container" class="hidden mt-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-3 transition-all">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-300 mb-1">
+                Current Password
+              </label>
+              <div class="relative">
+                <input type="password" id="edit-current-password" placeholder="Enter your current password" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-xs text-white placeholder-slate-500">
+                <button type="button" onclick="togglePasswordVisibility('edit-current-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" tabindex="-1" title="Show/Hide Password">
+                  <i class="fa-regular fa-eye text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-300 mb-1">
+                  New Password (min 4 chars)
+                </label>
+                <div class="relative">
+                  <input type="password" id="edit-new-password" placeholder="New password" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-xs text-white placeholder-slate-500">
+                  <button type="button" onclick="togglePasswordVisibility('edit-new-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" tabindex="-1" title="Show/Hide Password">
+                    <i class="fa-regular fa-eye text-xs"></i>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-300 mb-1">
+                  Confirm New Password
+                </label>
+                <div class="relative">
+                  <input type="password" id="edit-confirm-password" placeholder="Repeat new password" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-xs text-white placeholder-slate-500">
+                  <button type="button" onclick="togglePasswordVisibility('edit-confirm-password', this)" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" tabindex="-1" title="Show/Hide Password">
+                    <i class="fa-regular fa-eye text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-[10px] text-slate-400">
+                <i class="fa-solid fa-lock text-indigo-400 mr-1"></i> Synchronized securely
+              </span>
+              <button type="button" id="btn-update-password" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition-all active:scale-95">
+                <i class="fa-solid fa-key text-[10px]"></i>
+                <span>Update Password Now</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- ACTION BUTTONS -->
         <div class="flex items-center gap-2.5 pt-2">
           <button type="button" onclick="closeEditProfileModal()" class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
@@ -1172,10 +1241,10 @@
 
   <!-- Supabase JS Client & Dual-Mode Adapter -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=2.1"></script>
+  <script src="supabase-client.js?v=2.2"></script>
 
   <!-- CampusBarter Core App Logic -->
-  <script src="script.js?v=2.1"></script>
+  <script src="script.js?v=2.2"></script>
   <!-- Preloader Fail-Safe Watchdog (Guarantees Page Reveal Never Gets Stuck) -->
   <script>
     setTimeout(function() {

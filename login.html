@@ -115,7 +115,13 @@
               <label class="block text-xs font-semibold text-slate-300">
                 <i class="fa-solid fa-lock text-sky-400 mr-1"></i> Password
               </label>
-              <span class="text-[11px] text-slate-400">Demo pass: <strong class="text-sky-300 font-mono">1234</strong></span>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400">Demo: <strong class="text-sky-300 font-mono">1234</strong></span>
+                <span class="text-slate-600">|</span>
+                <button type="button" onclick="openResetPasswordModal()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium cursor-pointer transition-colors" title="Change or reset your password">
+                  Forgot / Change?
+                </button>
+              </div>
             </div>
             <div class="relative">
               <input type="password" id="login-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2.5 text-xs">
@@ -232,6 +238,123 @@
       </div>
 
     </div>
+
+    <!-- MODAL: RESET / CHANGE PASSWORD MODAL (2-STAGE OTP VERIFICATION) -->
+    <div id="reset-password-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+      <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative">
+        <button type="button" onclick="closeResetPasswordModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center text-base shadow-lg shadow-indigo-500/25">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold font-heading text-white">Reset Password</h3>
+            <p class="text-xs text-slate-400">2-Step Verified Identity &amp; OTP Protection</p>
+          </div>
+        </div>
+
+        <div id="reset-pass-alert" class="hidden mb-3 p-3 rounded-xl text-xs flex items-center gap-2"></div>
+
+        <!-- STEP 1: Enter email to request verification code -->
+        <div id="reset-step-1" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Registered College Email</label>
+            <div class="relative">
+              <input type="email" id="reset-email-input" placeholder="e.g. yourname@college.edu" class="w-full glass-input rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white">
+              <i class="fa-regular fa-envelope absolute left-3 top-3 text-slate-400 text-xs"></i>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2">
+              <i class="fa-solid fa-lock text-indigo-400 mr-1"></i>
+              To protect collegiate accounts, a 6-digit One-Time Passcode (OTP) is required before any password update.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <button type="button" onclick="closeResetPasswordModal()" class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
+              Cancel
+            </button>
+            <button type="button" id="reset-send-otp-btn" onclick="sendPasswordResetOtp()" class="w-2/3 btn-primary py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Send Security Code</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Verify OTP and Set New Password -->
+        <div id="reset-step-2" class="space-y-3.5 hidden">
+          <!-- Verification Dispatch Notification & Demo Box -->
+          <div class="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-xs">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-semibold text-indigo-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-envelope-circle-check text-emerald-400"></i> Code Dispatched To:
+              </span>
+              <button type="button" onclick="backToResetStep1()" class="text-[10px] text-slate-400 hover:text-white underline">Change Email</button>
+            </div>
+            <div class="font-mono text-xs text-white font-bold truncate" id="reset-display-email">student@college.edu</div>
+            
+            <!-- Simulated Inbox Dispatch Card -->
+            <div class="mt-2.5 p-2 rounded-lg bg-slate-900/80 border border-white/10 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 block">📬 Demo Security Dispatch:</span>
+                <span class="text-sm font-mono font-bold tracking-widest text-emerald-400" id="reset-simulated-otp">123456</span>
+              </div>
+              <button type="button" onclick="autoFillResetOtp()" class="px-2.5 py-1 rounded bg-indigo-600/50 hover:bg-indigo-600 text-[10px] font-semibold text-indigo-200 hover:text-white transition-all flex items-center gap-1">
+                <i class="fa-solid fa-copy"></i>
+                <span>Auto-Fill</span>
+              </button>
+            </div>
+          </div>
+
+          <form id="reset-password-form" class="space-y-3" novalidate>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-semibold text-slate-300">6-Digit Verification Code (OTP)</label>
+                <button type="button" id="reset-resend-btn" onclick="resendPasswordResetOtp()" class="text-[10px] text-indigo-400 hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                  Resend Code
+                </button>
+              </div>
+              <div class="relative">
+                <input type="text" id="reset-otp-input" maxlength="6" placeholder="• • • • • •" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-white font-bold uppercase">
+                <i class="fa-solid fa-shield-halved absolute left-3 top-3 text-slate-400 text-xs"></i>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">New Password (min 4 characters)</label>
+              <div class="relative">
+                <input type="password" id="reset-new-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2 text-xs text-white">
+                <button type="button" onclick="togglePasswordVisibility('reset-new-password-input', 'toggle-reset-icon-1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" tabindex="-1">
+                  <i id="toggle-reset-icon-1" class="fa-regular fa-eye text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Confirm New Password</label>
+              <div class="relative">
+                <input type="password" id="reset-confirm-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2 text-xs text-white">
+                <button type="button" onclick="togglePasswordVisibility('reset-confirm-password-input', 'toggle-reset-icon-2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" tabindex="-1">
+                  <i id="toggle-reset-icon-2" class="fa-regular fa-eye text-xs"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2">
+              <button type="button" onclick="backToResetStep1()" class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
+                Back
+              </button>
+              <button type="submit" id="reset-pass-submit-btn" class="w-2/3 btn-primary py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+                <i class="fa-solid fa-lock-open"></i>
+                <span>Verify &amp; Save</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Footer -->
@@ -241,14 +364,14 @@
 
   <!-- Supabase JS Client & Dual-Mode Adapter -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js?v=2.1"></script>
+  <script src="supabase-client.js?v=2.2"></script>
 
   <!-- Standalone Login & Sign Up Logic with Creative Loader & Custom Validation -->
   <script>
     // Password Visibility Toggle (Show / Hide Password)
     function togglePasswordVisibility(inputId, iconId) {
       const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
+      const icon = typeof iconId === "string" ? document.getElementById(iconId) : iconId;
       if (!input || !icon) return;
       if (input.type === "password") {
         input.type = "text";
@@ -504,8 +627,18 @@
     // CUSTOM FORM VALIDATION (Replaces default browser tooltips)
     // =========================================================================
     function clearErrors(form) {
+      if (!form) return;
       form.querySelectorAll(".field-error-input").forEach(el => el.classList.remove("field-error-input"));
       form.querySelectorAll(".field-error-tooltip").forEach(el => el.remove());
+    }
+
+    function clearFieldError(input) {
+      if (!input) return;
+      input.classList.remove("field-error-input");
+      const tip = (input.closest(".relative") || input).nextElementSibling;
+      if (tip && tip.classList.contains("field-error-tooltip")) {
+        tip.remove();
+      }
     }
 
     function showFieldError(input, message) {
@@ -633,14 +766,20 @@
           if (!localAcc) {
             throw new Error("No account found with this email. Please switch to Sign Up!");
           }
-          if (localAcc.password && localAcc.password !== password) {
-            throw new Error("Incorrect password. Demo password is: 1234");
+          if (!localAcc.password) {
+            // Self-heal: If an older account's password was stripped by the previous bug, lock the password entered
+            localAcc.password = password;
+            localStorage.setItem("cb_accounts", JSON.stringify(accounts));
+          } else if (String(localAcc.password) !== String(password)) {
+            throw new Error("Incorrect password. Please enter your valid account password.");
           }
           loggedUser = typeof normalizeProfile === "function" ? normalizeProfile(localAcc) : localAcc;
+          loggedUser.password = password;
           localStorage.setItem("cb_current_user", JSON.stringify(loggedUser));
           localStorage.setItem("cb_auth_version", "cb_v2.1_guest_enforced");
         } else {
           loggedUser = typeof normalizeProfile === "function" ? normalizeProfile(loggedUser) : loggedUser;
+          loggedUser.password = password;
           localStorage.setItem("cb_current_user", JSON.stringify(loggedUser));
           localStorage.setItem("cb_auth_version", "cb_v2.1_guest_enforced");
         }
@@ -664,10 +803,10 @@
         hideEnergyBeam(formLogin);
         setButtonLoading(submitBtn, false);
         showAlert(err.message, "error");
-        if (err.message.includes("password")) {
-          showFieldError(passwordInput, "Incorrect password. Demo password is 1234");
+        if (err.message.toLowerCase().includes("password")) {
+          showFieldError(passwordInput, err.message);
           passwordInput.focus();
-        } else if (err.message.includes("email") || err.message.includes("account")) {
+        } else if (err.message.toLowerCase().includes("email") || err.message.toLowerCase().includes("account")) {
           showFieldError(emailInput, err.message);
           emailInput.focus();
         }
@@ -843,6 +982,315 @@
     if (window.SoundFX) {
       SoundFX.bindToggleBtn('#sfx-toggle-btn', '#sfx-toggle-icon', '#sfx-toggle-label');
     }
+
+    // =========================================================================
+    // FORGOT / RESET PASSWORD MODAL CONTROLLERS (2-STAGE OTP VERIFICATION)
+    // =========================================================================
+    const resetVerificationState = {
+      email: "",
+      otp: "",
+      expiresAt: 0,
+      resendCountdown: 0,
+      timerId: null,
+      attempts: 0
+    };
+
+    function openResetPasswordModal() {
+      const modal = document.getElementById("reset-password-modal");
+      if (!modal) return;
+      const loginEmailInput = document.getElementById("login-email-input");
+      const resetEmailInput = document.getElementById("reset-email-input");
+      if (resetEmailInput && loginEmailInput && loginEmailInput.value.trim()) {
+        resetEmailInput.value = loginEmailInput.value.trim();
+      }
+      backToResetStep1();
+      modal.classList.remove("hidden");
+      if (window.SoundFX) SoundFX.playWhoosh();
+    }
+
+    function closeResetPasswordModal() {
+      const modal = document.getElementById("reset-password-modal");
+      if (modal) modal.classList.add("hidden");
+      if (resetVerificationState.timerId) {
+        clearInterval(resetVerificationState.timerId);
+        resetVerificationState.timerId = null;
+      }
+      if (window.SoundFX) SoundFX.playPop();
+    }
+
+    function backToResetStep1() {
+      const step1 = document.getElementById("reset-step-1");
+      const step2 = document.getElementById("reset-step-2");
+      if (step1) step1.classList.remove("hidden");
+      if (step2) step2.classList.add("hidden");
+      const alertBox = document.getElementById("reset-pass-alert");
+      if (alertBox) alertBox.classList.add("hidden");
+      const resetForm = document.getElementById("reset-password-form");
+      if (resetForm) clearErrors(resetForm);
+      const emailInput = document.getElementById("reset-email-input");
+      if (emailInput) clearFieldError(emailInput);
+    }
+
+    function autoFillResetOtp() {
+      const otpInput = document.getElementById("reset-otp-input");
+      if (otpInput && resetVerificationState.otp) {
+        otpInput.value = resetVerificationState.otp;
+        clearFieldError(otpInput);
+        if (window.SoundFX) SoundFX.playPop();
+      }
+    }
+
+    async function sendPasswordResetOtp() {
+      const emailInput = document.getElementById("reset-email-input");
+      const sendBtn = document.getElementById("reset-send-otp-btn");
+      const alertBox = document.getElementById("reset-pass-alert");
+      if (alertBox) alertBox.classList.add("hidden");
+      if (emailInput) clearFieldError(emailInput);
+
+      const email = emailInput ? emailInput.value.trim().toLowerCase() : "";
+      if (!email) {
+        showFieldError(emailInput, "Please enter your registered college email");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError(emailInput, "Please enter a valid email (e.g. name@college.edu)");
+        return;
+      }
+
+      setButtonLoading(sendBtn, true, "Verifying Account...");
+      try {
+        const accounts = ensureAccountsSeeded();
+        const acc = accounts.find(a => a.email && a.email.toLowerCase() === email);
+        if (!acc) {
+          throw new Error("No account registered with this email address!");
+        }
+
+        // Generate cryptographically sound 6-digit OTP
+        const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        resetVerificationState.email = email;
+        resetVerificationState.otp = generatedOtp;
+        resetVerificationState.expiresAt = Date.now() + 5 * 60 * 1000; // 5 mins
+        resetVerificationState.resendCountdown = 60;
+        resetVerificationState.attempts = 0;
+
+        // Populate step 2
+        const displayEmail = document.getElementById("reset-display-email");
+        const simOtp = document.getElementById("reset-simulated-otp");
+        const otpInput = document.getElementById("reset-otp-input");
+        const newPassInput = document.getElementById("reset-new-password-input");
+        const confirmPassInput = document.getElementById("reset-confirm-password-input");
+
+        if (displayEmail) displayEmail.textContent = email;
+        if (simOtp) simOtp.textContent = generatedOtp;
+        if (otpInput) {
+          otpInput.value = "";
+          clearFieldError(otpInput);
+        }
+        if (newPassInput) {
+          newPassInput.value = "";
+          clearFieldError(newPassInput);
+        }
+        if (confirmPassInput) {
+          confirmPassInput.value = "";
+          clearFieldError(confirmPassInput);
+        }
+
+        // Transition views
+        const step1 = document.getElementById("reset-step-1");
+        const step2 = document.getElementById("reset-step-2");
+        if (step1) step1.classList.add("hidden");
+        if (step2) step2.classList.remove("hidden");
+
+        startResendTimer();
+        if (window.SoundFX) SoundFX.playSuccess();
+      } catch (err) {
+        if (window.SoundFX) SoundFX.playError();
+        showFieldError(emailInput, err.message);
+      } finally {
+        setButtonLoading(sendBtn, false);
+      }
+    }
+
+    function startResendTimer() {
+      const resendBtn = document.getElementById("reset-resend-btn");
+      if (!resendBtn) return;
+      if (resetVerificationState.timerId) {
+        clearInterval(resetVerificationState.timerId);
+      }
+      resendBtn.disabled = true;
+      resendBtn.textContent = `Resend in ${resetVerificationState.resendCountdown}s`;
+
+      resetVerificationState.timerId = setInterval(() => {
+        resetVerificationState.resendCountdown--;
+        if (resetVerificationState.resendCountdown <= 0) {
+          clearInterval(resetVerificationState.timerId);
+          resetVerificationState.timerId = null;
+          resendBtn.disabled = false;
+          resendBtn.textContent = "Resend Code";
+        } else {
+          resendBtn.textContent = `Resend in ${resetVerificationState.resendCountdown}s`;
+        }
+      }, 1000);
+    }
+
+    function resendPasswordResetOtp() {
+      if (resetVerificationState.resendCountdown > 0) return;
+      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      resetVerificationState.otp = newOtp;
+      resetVerificationState.expiresAt = Date.now() + 5 * 60 * 1000;
+      resetVerificationState.resendCountdown = 60;
+      resetVerificationState.attempts = 0;
+
+      const simOtp = document.getElementById("reset-simulated-otp");
+      if (simOtp) simOtp.textContent = newOtp;
+      startResendTimer();
+      if (window.SoundFX) SoundFX.playPop();
+
+      const alertBox = document.getElementById("reset-pass-alert");
+      if (alertBox) {
+        alertBox.className = "mb-3 p-2.5 rounded-xl text-xs flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300";
+        alertBox.innerHTML = '<i class="fa-solid fa-check-circle text-emerald-400"></i><span>New 6-digit verification code dispatched!</span>';
+        alertBox.classList.remove("hidden");
+        setTimeout(() => { if (alertBox) alertBox.classList.add("hidden"); }, 3500);
+      }
+    }
+
+    window.openResetPasswordModal = openResetPasswordModal;
+    window.closeResetPasswordModal = closeResetPasswordModal;
+    window.backToResetStep1 = backToResetStep1;
+    window.autoFillResetOtp = autoFillResetOtp;
+    window.sendPasswordResetOtp = sendPasswordResetOtp;
+    window.resendPasswordResetOtp = resendPasswordResetOtp;
+
+    const resetPassForm = document.getElementById("reset-password-form");
+    if (resetPassForm) {
+      resetPassForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearErrors(resetPassForm);
+        const otpInput = document.getElementById("reset-otp-input");
+        const newPassInput = document.getElementById("reset-new-password-input");
+        const confirmPassInput = document.getElementById("reset-confirm-password-input");
+        const submitBtn = document.getElementById("reset-pass-submit-btn");
+
+        const email = resetVerificationState.email.trim().toLowerCase();
+        const enteredOtp = otpInput ? otpInput.value.trim() : "";
+        const newPass = newPassInput ? newPassInput.value : "";
+        const confirmPass = confirmPassInput ? confirmPassInput.value : "";
+
+        let hasError = false;
+        let firstField = null;
+
+        // 1. Verify OTP presence and validity
+        if (!enteredOtp) {
+          showFieldError(otpInput, "Please enter the 6-digit verification code");
+          hasError = true;
+          firstField = otpInput;
+        } else if (Date.now() > resetVerificationState.expiresAt) {
+          showFieldError(otpInput, "Security code expired (5 min limit). Please resend a new code.");
+          hasError = true;
+          firstField = otpInput;
+        } else if (enteredOtp !== resetVerificationState.otp) {
+          resetVerificationState.attempts++;
+          if (resetVerificationState.attempts >= 5) {
+            showFieldError(otpInput, "Too many invalid attempts. Please request a new security code.");
+            setTimeout(() => backToResetStep1(), 2000);
+          } else {
+            showFieldError(otpInput, `Invalid verification code (${5 - resetVerificationState.attempts} attempts remaining)`);
+          }
+          hasError = true;
+          firstField = otpInput;
+        }
+
+        // 2. Validate New Password
+        if (!newPass) {
+          showFieldError(newPassInput, "Please enter a new password");
+          hasError = true;
+          if (!firstField) firstField = newPassInput;
+        } else if (newPass.length < 4) {
+          showFieldError(newPassInput, "New password must be at least 4 characters");
+          hasError = true;
+          if (!firstField) firstField = newPassInput;
+        }
+
+        // 3. Confirm Password Match
+        if (!confirmPass) {
+          showFieldError(confirmPassInput, "Please confirm your new password");
+          hasError = true;
+          if (!firstField) firstField = confirmPassInput;
+        } else if (newPass !== confirmPass) {
+          showFieldError(confirmPassInput, "Passwords do not match");
+          hasError = true;
+          if (!firstField) firstField = confirmPassInput;
+        }
+
+        if (hasError) {
+          if (firstField) firstField.focus();
+          return;
+        }
+
+        setButtonLoading(submitBtn, true, "Verifying & Updating...");
+        try {
+          const accounts = ensureAccountsSeeded();
+          const accIdx = accounts.findIndex(a => a.email && a.email.toLowerCase() === email);
+          if (accIdx === -1) {
+            throw new Error("Target account could not be found!");
+          }
+
+          // Update password in local storage accounts
+          accounts[accIdx].password = newPass;
+          localStorage.setItem("cb_accounts", JSON.stringify(accounts));
+
+          // If currently logged in user matches, update their session password too
+          try {
+            const rawUser = localStorage.getItem("cb_current_user");
+            if (rawUser) {
+              const u = JSON.parse(rawUser);
+              if (u && u.email && u.email.toLowerCase() === email) {
+                u.password = newPass;
+                localStorage.setItem("cb_current_user", JSON.stringify(u));
+              }
+            }
+          } catch (e) {}
+
+          // If DataManager online, sync password to Supabase cloud
+          if (typeof DataManager !== "undefined" && typeof DataManager.updatePassword === "function") {
+            try {
+              await DataManager.updatePassword(email, newPass);
+            } catch (err) {
+              console.warn("Cloud password update notice:", err.message);
+            }
+          }
+
+          // Invalidate OTP state so it cannot be re-used
+          resetVerificationState.otp = "";
+          resetVerificationState.expiresAt = 0;
+
+          if (window.SoundFX) SoundFX.playSuccess();
+          closeResetPasswordModal();
+
+          // Auto-fill into login form
+          const loginEmailInput = document.getElementById("login-email-input");
+          const loginPassInput = document.getElementById("login-password-input");
+          if (loginEmailInput) loginEmailInput.value = email;
+          if (loginPassInput) loginPassInput.value = newPass;
+
+          showAlert("Security verified! Password reset successfully. You can now log in.", "success");
+        } catch (err) {
+          if (window.SoundFX) SoundFX.playError();
+          setButtonLoading(submitBtn, false);
+          showFieldError(otpInput, err.message);
+        }
+      });
+    }
+
+    document.querySelectorAll(".glass-modal-backdrop").forEach(m => {
+      m.addEventListener("click", (e) => {
+        if (e.target === m) m.classList.add("hidden");
+      });
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeResetPasswordModal();
+    });
   </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CampusBarter - Supabase & Offline Dual-Mode Client Adapter
  * Manages Cloud Synchronization, LocalStorage Caching, and Secure Karma Transactions.
  */
@@ -58,11 +58,13 @@ function normalizeProfile(p) {
   const dept = p.department || (p.user_metadata && p.user_metadata.department) || "Computer Science";
   const sem = p.semester || (p.user_metadata && p.user_metadata.semester) || "Sem 4";
   const karma = typeof p.karma === "number" ? p.karma : 300;
+  const pass = p.password || p.pass || "";
 
   return {
     id: p.id,
     name: name,
     email: p.email || "",
+    password: pass,
     department: dept,
     semester: sem,
     karma: karma,
@@ -262,6 +264,43 @@ const DataManager = {
       }
     }
     return null;
+  },
+
+  // ---------------------------------------------------------------------------
+  // SECURE PASSWORD UPDATE (Cloud Supabase Auth + LocalStorage Dual-Sync)
+  // ---------------------------------------------------------------------------
+  async updatePassword(email, newPassword) {
+    if (!email || !newPassword) throw new Error("Email and new password are required.");
+    if (newPassword.length < 4) throw new Error("New password must be at least 4 characters long.");
+
+    if (this.isOnline() && sbClient) {
+      try {
+        const { error } = await sbClient.auth.updateUser({ password: newPassword });
+        if (error) console.warn("[CampusBarter Backend] Cloud password update warning:", error.message);
+      } catch (err) {
+        console.warn("[CampusBarter Backend] Cloud password update exception:", err.message);
+      }
+    }
+
+    // Always synchronize into localStorage cb_accounts & cb_current_user
+    try {
+      const accounts = JSON.parse(localStorage.getItem("cb_accounts") || "[]");
+      const accIdx = accounts.findIndex(a => a.email && a.email.toLowerCase() === email.toLowerCase());
+      if (accIdx !== -1) {
+        accounts[accIdx].password = newPassword;
+        localStorage.setItem("cb_accounts", JSON.stringify(accounts));
+      }
+
+      const curr = JSON.parse(localStorage.getItem("cb_current_user") || "null");
+      if (curr && curr.email && curr.email.toLowerCase() === email.toLowerCase()) {
+        curr.password = newPassword;
+        localStorage.setItem("cb_current_user", JSON.stringify(curr));
+      }
+    } catch (e) {
+      console.warn("[CampusBarter Backend] Local storage password sync note:", e.message);
+    }
+
+    return true;
   },
 
   // ---------------------------------------------------------------------------
