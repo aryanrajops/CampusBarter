@@ -166,12 +166,9 @@ function saveStoredAccounts(accounts) {
 function getStoredCurrentUser() {
   try {
     const user = localStorage.getItem("cb_current_user");
-    if (user === null) {
-      const def = DEFAULT_ACCOUNTS.find(a => a.email === 'aryanraj.20j@gmail.com') || DEFAULT_ACCOUNTS[0];
-      localStorage.setItem("cb_current_user", JSON.stringify(def));
-      return def;
+    if (!user || user === "null") {
+      return null;
     }
-    if (!user || user === "null") return null;
     let parsed = JSON.parse(user);
     if (typeof normalizeProfile === "function") {
       parsed = normalizeProfile(parsed);
@@ -1000,7 +997,7 @@ function renderNavbarAuth() {
   const user = STATE.currentUser;
 
   if (!user) {
-    // Logged Out / Guest Mode: Show Log In & Sign Up buttons linking to dedicated login.html
+    // Logged Out / Guest Mode: Show Clean Log In & Sign Up buttons linking to login.html
     container.innerHTML = `
       <a href="login.html#login" class="btn-glass text-xs px-3.5 py-2 rounded-xl font-medium transition-all hover:text-white">Log In</a>
       <a href="login.html#signup" class="btn-emerald text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/25">
@@ -1016,18 +1013,12 @@ function renderNavbarAuth() {
       `;
     }
   } else {
-    // Logged In Mode: Render Full User Profile Chip, Karma Badge, Refill Status & Dropdown
+    // Logged In Mode: Render Clean Profile Chip, Karma Badge & Streamlined Dropdown
     container.innerHTML = `
-      <!-- Karma Token Recharge Pill (30 Karma/hr, 2-Hour Batch, Max 120⚡) -->
-      <button id="token-refill-pill" onclick="openTokenRefillModal()" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-400/30 text-indigo-300 text-xs font-mono hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-all cursor-pointer shadow-sm group" title="Karma Token Refill: +30⚡/hr (Max 120⚡ Cap)">
-        <i class="fa-solid fa-hourglass-half text-sky-400 text-[11px] group-hover:rotate-180 transition-transform duration-500"></i>
-        <span id="nav-refill-timer">120⚡ Max (Full)</span>
-        <span id="nav-refill-badge" class="text-[10px] text-emerald-400 font-bold">Active</span>
-      </button>
-
+      <!-- Quick Upload Button -->
       <button id="open-upload-modal-btn" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/25 transition-all">
         <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
-        <span>Upload PYQ <strong class="text-amber-400 font-bold ml-0.5">+25⚡</strong></span>
+        <span>Upload PYQ <strong class="text-amber-400 font-bold ml-0.5">+25&#9889;</strong></span>
       </button>
 
       <!-- Student Profile Chip Trigger -->
@@ -1039,7 +1030,7 @@ function renderNavbarAuth() {
               <p class="text-xs font-bold text-white line-clamp-1">${escapeHTML(user.name)}</p>
               ${renderAiBadge(user.isAi, true)}
             </div>
-            <p class="text-[10px] text-slate-400">${escapeHTML(user.semester || 'Semester 1')} • ${escapeHTML((user.department || 'General').split(" ")[0])}</p>
+            <p class="text-[10px] text-slate-400">${escapeHTML(user.semester || 'Semester 1')} &bull; ${escapeHTML((user.department || 'General').split(" ")[0])}</p>
           </div>
           <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-400/10 border border-amber-400/25 text-amber-300 text-xs font-black">
             <i class="fa-solid fa-bolt text-amber-400 text-[11px]"></i>
@@ -1048,79 +1039,53 @@ function renderNavbarAuth() {
           <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] ml-0.5"></i>
         </button>
 
-        <!-- Dropdown Menu -->
-        <div id="user-dropdown-menu" class="hidden absolute right-0 mt-2 w-72 rounded-2xl user-dropdown p-3 z-50">
-          <div class="pb-2.5 mb-2.5 border-b border-white/10">
-            <p class="text-xs font-semibold text-slate-400">Signed in as</p>
-            <div class="flex items-center justify-between gap-1.5 mt-0.5">
-              <div class="flex items-center gap-1.5 min-w-0">
+        <!-- Streamlined Dropdown Menu (Clean, Modern, Uncluttered) -->
+        <div id="user-dropdown-menu" class="hidden absolute right-0 mt-2 w-72 rounded-2xl user-dropdown p-3 z-50 shadow-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl">
+          <!-- Profile Card -->
+          <div class="flex items-center gap-3 pb-3 border-b border-white/10">
+            <img src="${user.avatar || 'assets/images/avatar-default.jpg'}" alt="${escapeHTML(user.name)}" class="w-10 h-10 rounded-xl object-cover border border-white/20">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
                 <p class="text-sm font-bold text-white truncate">${escapeHTML(user.name)}</p>
                 ${renderAiBadge(user.isAi, true)}
               </div>
-              <button onclick="openEditProfileModal()" class="px-2 py-1 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 hover:text-white border border-indigo-500/30 text-[11px] font-semibold flex items-center gap-1 transition-colors" title="Edit Profile">
-                <i class="fa-solid fa-pen-to-square"></i> Edit
-              </button>
+              <p class="text-xs text-slate-400 font-mono truncate">${escapeHTML(user.email)}</p>
             </div>
-            <p class="text-xs text-indigo-300 font-mono truncate">${escapeHTML(user.email)}</p>
-            <div class="mt-2 flex items-center justify-between text-xs px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 font-bold">
-              <span>Karma Balance</span><span>${user.karma} ⚡</span>
-            </div>
+          </div>
 
-            <!-- Karma Token Refill Info Card -->
-            <div onclick="openTokenRefillModal()" class="mt-2 p-2 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-xs cursor-pointer hover:bg-indigo-950/70 transition-colors" title="Click to view Karma Token refill details">
-              <div class="flex items-center justify-between text-indigo-300 font-medium">
-                <span class="flex items-center gap-1"><i class="fa-solid fa-bolt-lightning text-sky-400 text-[11px]"></i> Karma Token Refill</span>
-                <span class="text-emerald-400 font-bold font-mono text-[10px]">+30⚡/hr (Max 120⚡)</span>
-              </div>
-              <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-                <span>Refill Status:</span>
-                <span id="dropdown-refill-timer" class="text-sky-300 font-mono font-semibold">120⚡ Cap Reached</span>
-              </div>
-              <div class="w-full bg-white/10 rounded-full h-1 mt-1.5 overflow-hidden">
-                <div id="dropdown-refill-progress" class="bg-gradient-to-r from-sky-400 to-emerald-400 h-full w-full transition-all duration-300"></div>
-              </div>
-            </div>
+          <!-- Karma Wallet Status -->
+          <div class="mt-2.5 mb-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+            <span class="text-xs text-amber-200 font-medium flex items-center gap-1.5">
+              <i class="fa-solid fa-coins text-amber-400"></i> Karma Wallet
+            </span>
+            <span class="text-xs font-black font-mono text-amber-300">${user.karma} &#9889;</span>
+          </div>
 
-            <!-- Personal User Activity Stats -->
-            <div class="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t border-white/5 text-center">
-              <div class="p-1.5 rounded-xl bg-white/5 border border-white/5">
-                <p class="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Swaps</p>
-                <p class="text-xs font-bold text-white">${user.swapsCompleted || 0}</p>
-              </div>
-              <div class="p-1.5 rounded-xl bg-white/5 border border-white/5">
-                <p class="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Uploads</p>
-                <p class="text-xs font-bold text-white">${user.pyqsUploaded || 0}</p>
-              </div>
-              <div class="p-1.5 rounded-xl bg-white/5 border border-white/5">
-                <p class="text-[9px] uppercase tracking-wider text-slate-400 font-semibold">Downloads</p>
-                <p class="text-xs font-bold text-white">${user.downloads || 0}</p>
-              </div>
-            </div>
-            <button onclick="openEditProfileModal()" class="w-full mt-2.5 py-2 px-3 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-purple-500/30 border border-indigo-500/30 text-indigo-300 hover:text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm">
-              <i class="fa-solid fa-user-pen text-indigo-400"></i>
-              <span>Edit Profile & Skills</span>
+          <!-- Quick Navigation Links -->
+          <div class="space-y-1 py-1">
+            <button onclick="openEditProfileModal()" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors">
+              <i class="fa-solid fa-user-pen text-indigo-400 w-4 text-center"></i>
+              <span>Edit Profile & Photo</span>
             </button>
+            <button onclick="openTokenRefillModal()" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors">
+              <i class="fa-solid fa-bolt-lightning text-sky-400 w-4 text-center"></i>
+              <span>Karma Refill & Rules</span>
+            </button>
+            <a href="#swaps-section" onclick="const d = document.getElementById('user-dropdown-menu'); if (d) d.classList.add('hidden');" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors">
+              <i class="fa-solid fa-arrows-rotate text-purple-400 w-4 text-center"></i>
+              <span>My Active Swaps</span>
+            </a>
+            <a href="#pyq-section" onclick="const d = document.getElementById('user-dropdown-menu'); if (d) d.classList.add('hidden');" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors">
+              <i class="fa-solid fa-file-lines text-emerald-400 w-4 text-center"></i>
+              <span>Browse PYQ Archive</span>
+            </a>
           </div>
 
-          <div class="mb-2.5">
-            <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1 px-1">Switch Account (AI Demo & Test)</p>
-            <div class="space-y-1">
-              ${STATE.accounts.map(acc => `
-                <button onclick="quickLoginDemo('${escapeHTML(acc.email)}')" class="w-full flex items-center justify-between p-1.5 rounded-xl text-xs hover:bg-white/10 text-left transition-colors ${acc.id === user.id ? 'bg-indigo-500/20 border border-indigo-500/30 font-semibold text-white' : 'text-slate-300'}">
-                  <div class="flex items-center gap-1.5">
-                    <img src="${acc.avatar || 'assets/images/avatar-default.jpg'}" class="w-6 h-6 rounded-lg object-cover">
-                    <span class="truncate max-w-[110px]">${escapeHTML(acc.name)}</span>
-                    ${acc.isAi ? '<span class="text-[9px] bg-purple-500/20 text-purple-300 px-1 py-0.2 rounded border border-purple-500/30 font-bold">AI</span>' : '<span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1 py-0.2 rounded border border-emerald-500/30 font-bold">Real</span>'}
-                  </div>
-                  <span class="text-amber-400 font-mono text-[11px] font-bold">${acc.karma}⚡</span>
-                </button>
-              `).join("")}
-            </div>
-          </div>
-          <div class="pt-2 border-t border-white/10 space-y-1">
-            <a href="login.html#signup" class="w-full text-left text-xs px-2 py-1.5 rounded-lg text-emerald-400 hover:bg-emerald-500/10 font-medium flex items-center gap-2 cursor-pointer"><i class="fa-solid fa-user-plus text-[11px]"></i> Create Another Account</a>
-            <button onclick="logoutUser()" class="w-full text-left text-xs px-2 py-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 font-medium flex items-center gap-2 cursor-pointer">
-              <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i> Log Out
+          <!-- Divider & Logout -->
+          <div class="pt-2 mt-1 border-t border-white/10">
+            <button onclick="logoutUser()" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors cursor-pointer">
+              <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+              <span>Log Out</span>
             </button>
           </div>
         </div>
@@ -1146,45 +1111,39 @@ function renderNavbarAuth() {
 
     if (mobileContainer) {
       mobileContainer.innerHTML = `
-        <div class="p-3 rounded-xl bg-white/5 border border-white/10 mb-3">
+        <div class="p-3 rounded-xl bg-white/5 border border-white/10 mb-2.5">
           <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <img src="${user.avatar || 'assets/images/avatar-default.jpg'}" class="w-8 h-8 rounded-lg object-cover">
-              <div>
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${user.avatar || 'assets/images/avatar-default.jpg'}" class="w-9 h-9 rounded-xl object-cover border border-white/20">
+              <div class="min-w-0">
                 <div class="flex items-center gap-1.5">
-                  <p class="text-xs font-bold text-white">${escapeHTML(user.name)}</p>
+                  <p class="text-xs font-bold text-white truncate">${escapeHTML(user.name)}</p>
                   ${renderAiBadge(user.isAi, true)}
                 </div>
-                <p class="text-[10px] text-slate-400">${escapeHTML(user.department || 'General')}</p>
+                <p class="text-[10px] text-slate-400 truncate">${escapeHTML(user.department || 'General')}</p>
               </div>
             </div>
-            <span class="text-amber-400 font-bold text-xs">${user.karma}⚡</span>
-          </div>
-          <div class="grid grid-cols-3 gap-1 text-center pt-2 border-t border-white/10 text-[10px]">
-            <div><span class="text-slate-400">Swaps:</span> <strong class="text-white">${user.swapsCompleted || 0}</strong></div>
-            <div><span class="text-slate-400">Uploads:</span> <strong class="text-white">${user.pyqsUploaded || 0}</strong></div>
-            <div><span class="text-slate-400">Downloads:</span> <strong class="text-white">${user.downloads || 0}</strong></div>
-          </div>
-          <!-- Mobile Karma Refill Card -->
-          <div onclick="openTokenRefillModal()" class="mt-2.5 p-2 rounded-xl bg-indigo-950/60 border border-indigo-500/20 text-xs flex items-center justify-between cursor-pointer">
-            <span class="text-indigo-300 font-medium flex items-center gap-1.5"><i class="fa-solid fa-hourglass-half text-sky-400"></i> Karma Refill:</span>
-            <span class="font-mono text-sky-300 font-bold"><span id="mobile-refill-timer">120⚡ Cap (Full)</span></span>
+            <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-400/10 border border-amber-400/25 text-amber-300 text-xs font-black">
+              <i class="fa-solid fa-bolt text-amber-400 text-[10px]"></i>
+              <span>${user.karma}</span>
+            </div>
           </div>
         </div>
-        <button onclick="openEditProfileModal()" class="w-full btn-glass text-xs py-2 rounded-xl font-bold mb-2 flex items-center justify-center gap-2 text-indigo-300 border-indigo-500/30">
-          <i class="fa-solid fa-user-pen"></i> Edit Profile & Skills
-        </button>
-        <a href="login.html#signup" class="w-full btn-glass text-xs py-2 rounded-xl font-medium mb-2 block text-center cursor-pointer">Create Another Account</a>
-        <button onclick="logoutUser()" class="w-full py-2 rounded-xl text-rose-400 text-xs font-medium bg-rose-500/10 border border-rose-500/20 cursor-pointer">Log Out</button>
+        <div class="flex flex-col gap-1.5">
+          <button onclick="openEditProfileModal()" class="w-full btn-glass text-xs py-2 rounded-xl font-semibold flex items-center justify-center gap-2 text-indigo-300 border-indigo-500/30">
+            <i class="fa-solid fa-user-pen"></i> Edit Profile & Photo
+          </button>
+          <button onclick="logoutUser()" class="w-full py-2 rounded-xl text-rose-400 text-xs font-semibold bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 transition-colors">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Log Out
+          </button>
+        </div>
       `;
     }
   }
 }
 
 // -----------------------------------------------------------------------------
-// SETUP AUTH SYSTEM (Modal Handlers & In-Place Login / Signup Engines)
-// -----------------------------------------------------------------------------
-// SETUP AUTH SYSTEM & CLIENT-SIDE NAVIGATION HELPERS
+// AUTH SYSTEM HELPERS & CLIENT-SIDE NAVIGATION
 // -----------------------------------------------------------------------------
 function setupAuthSystem() {
   checkAuthHash();
@@ -1196,7 +1155,7 @@ function openAuthModal(mode = "login") {
 
 function quickLoginDemo(email) {
   const accounts = STATE.accounts && STATE.accounts.length ? STATE.accounts : getStoredAccounts();
-  const user = accounts.find(a => a.email.toLowerCase() === email.toLowerCase());
+  const user = accounts.find(a => a.email && a.email.toLowerCase() === email.toLowerCase());
   if (!user) return;
   setStoredCurrentUser(user);
   STATE.currentUser = user;
@@ -1208,7 +1167,7 @@ function quickLoginDemo(email) {
   populatePeerDropdown();
   updateGlobalStats();
   if (window.SoundFX) SoundFX.playSuccess();
-  showToast('Switched account to ' + user.name + ' (' + user.karma + 's)', 'success', 'fa-user-check');
+  showToast('Switched account to ' + user.name + ' (' + user.karma + ' Karma)', 'success', 'fa-user-check');
 }
 
 function logoutUser() {
@@ -2832,6 +2791,7 @@ function initCreativePreloader() {
 
     setTimeout(() => {
       preloader.style.display = "none";
+      try { preloader.remove(); } catch (e) {}
     }, 700);
   };
 
@@ -2960,43 +2920,37 @@ function tickTokenRefillTimer() {
   const user = STATE.currentUser;
   if (!user) return;
 
-  const navTimer = document.getElementById("nav-refill-timer");
-  const navPill = document.getElementById("token-refill-pill");
-  const navBadge = document.getElementById("nav-refill-badge");
-  const mobileTimer = document.getElementById("mobile-refill-timer");
-  const dropTimer = document.getElementById("dropdown-refill-timer");
-  const dropProgress = document.getElementById("dropdown-refill-progress");
-  const modalTimer = document.getElementById("modal-refill-countdown");
-  const modalProgress = document.getElementById("modal-refill-progress");
-  const modalStatus = document.getElementById("modal-refill-status");
-
-  // RULE: If balance is at or above 120 Karma, refill stops ("ruk jayegi")!
+  // RULE: If balance is at or above 120 Karma, refill is paused at max cap
   if (user.karma >= MAX_REFILL_CAP) {
-    user.lastRefillTime = Date.now(); // Keep fresh so when balance drops below 120, 2h cycle starts
+    user.lastRefillTime = Date.now();
 
-    if (navTimer) navTimer.textContent = "120⚡ Max (Full)";
-    if (navBadge) navBadge.textContent = "Paused";
-    if (navPill) {
-      navPill.title = `Karma Refill Paused: Balance (${user.karma}⚡) is at or above the 120⚡ cap. Refill resumes if balance drops below 120⚡.`;
-    }
-
-    if (mobileTimer) mobileTimer.textContent = "120⚡ Cap (Full)";
-    if (dropTimer) dropTimer.textContent = "Paused (≥120⚡ Cap)";
-    if (dropProgress) {
-      dropProgress.style.width = "100%";
-      dropProgress.className = "bg-emerald-400 h-full w-full transition-all duration-300";
+    const navTimer = document.getElementById("nav-refill-timer");
+    if (navTimer && navTimer.textContent !== "120 Max (Full)") {
+      navTimer.textContent = "120 Max (Full)";
+      const navBadge = document.getElementById("nav-refill-badge");
+      if (navBadge) navBadge.textContent = "Paused";
+      const navPill = document.getElementById("token-refill-pill");
+      if (navPill) {
+        navPill.title = `Karma Refill Paused: Balance (${user.karma} Karma) is at or above the 120 Karma cap. Refill resumes if balance drops below 120.`;
+      }
     }
 
-    if (modalTimer) {
-      modalTimer.textContent = "120⚡ CAP REACHED";
-      modalTimer.className = "text-2xl sm:text-3xl font-black font-mono text-emerald-400 my-1";
-    }
-    if (modalProgress) {
-      modalProgress.style.width = "100%";
-      modalProgress.className = "bg-emerald-400 h-full w-full transition-all duration-500";
-    }
-    if (modalStatus) {
-      modalStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Refill Paused • Balance (${user.karma}⚡) is at or above 120⚡ cap</span>`;
+    const modal = document.getElementById("token-refill-modal");
+    if (modal && !modal.classList.contains("hidden")) {
+      const modalTimer = document.getElementById("modal-refill-countdown");
+      if (modalTimer && modalTimer.textContent !== "120 CAP REACHED") {
+        modalTimer.textContent = "120 CAP REACHED";
+        modalTimer.className = "text-2xl sm:text-3xl font-black font-mono text-emerald-400 my-1";
+        const modalProgress = document.getElementById("modal-refill-progress");
+        if (modalProgress) {
+          modalProgress.style.width = "100%";
+          modalProgress.className = "bg-emerald-400 h-full w-full transition-all duration-500";
+        }
+        const modalStatus = document.getElementById("modal-refill-status");
+        if (modalStatus) {
+          modalStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Refill Paused &bull; Balance (${user.karma} Karma) is at or above 120 cap</span>`;
+        }
+      }
     }
     return;
   }
