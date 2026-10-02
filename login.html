@@ -1,0 +1,860 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login & Sign Up | CampusBarter - Student Exchange & PYQ Vault</title>
+  <meta name="description" content="Sign in or register for CampusBarter. Claim 300 Karma points instantly, trade programming for calculus, and access past question papers.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Outfit (Headings) & Plus Jakarta Sans (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CampusBarter Custom Glassmorphism Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Procedural Web Audio Sound Engine -->
+  <script src="sound-fx.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Outfit', 'sans-serif'],
+            body: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="bg-ambient-orb orb-1"></div>
+  <div class="bg-ambient-orb orb-2"></div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="relative z-20 w-full px-4 sm:px-8 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <!-- Logo -->
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <i class="fa-solid fa-arrows-rotate text-emerald-400 text-base"></i>
+          </div>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight font-heading text-white">Campus<span class="text-indigo-400">Barter</span></span>
+          <span class="block text-[10px] text-slate-400 font-medium tracking-wide">Student Knowledge & Resource Vault</span>
+        </div>
+      </a>
+
+      <div class="flex items-center gap-2">
+        <!-- SFX Audio Control Toggle -->
+        <button id="sfx-toggle-btn" class="btn-glass p-2 sm:px-3 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-300 hover:text-white" title="Toggle Sound Effects" aria-label="Toggle Sound Effects">
+          <i id="sfx-toggle-icon" class="fa-solid fa-volume-high text-emerald-400"></i>
+          <span id="sfx-toggle-label" class="hidden sm:inline text-[11px] font-mono">SFX</span>
+        </button>
+
+        <!-- Back to Home Link -->
+        <a href="index.html" class="btn-glass px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 hover:text-white text-slate-300">
+          <i class="fa-solid fa-arrow-left text-blue-400"></i>
+          <span>Back to Home</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Auth Card Container -->
+  <main class="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6 my-4">
+    <div class="w-full max-w-md">
+
+      <!-- Alert Notification Banner (Dynamic) -->
+      <div id="auth-alert" class="hidden mb-4 p-3.5 rounded-xl text-xs flex items-center gap-2.5 transition-all"></div>
+
+      <!-- Glass Auth Card -->
+      <div id="auth-card" class="glass-card p-6 sm:p-8 border-white/15 shadow-2xl relative overflow-hidden">
+
+        <!-- Top Header & Subtitle -->
+        <div class="text-center mb-6">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/25 text-blue-200 text-[11px] font-semibold mb-3">
+            <i class="fa-solid fa-graduation-cap text-sky-400"></i>
+            <span>Student Knowledge & Resource Vault</span>
+          </div>
+          <h1 id="auth-title" class="text-2xl sm:text-3xl font-extrabold text-white font-heading">Welcome Back</h1>
+          <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">Sign in to manage your swaps, karma, and PYQ vault.</p>
+        </div>
+
+        <!-- Auth Tabs (Log In vs Sign Up) -->
+        <div class="flex items-center rounded-xl bg-slate-900/80 p-1 mb-6 border border-white/10">
+          <button id="tab-login" type="button" class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow">
+            <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Log In
+          </button>
+          <button id="tab-signup" type="button" class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white">
+            <i class="fa-solid fa-sparkles mr-1.5 text-amber-400"></i> Sign Up (+300⚡)
+          </button>
+        </div>
+
+        <!-- FORM 1: LOG IN -->
+        <form id="page-login-form" class="space-y-4" novalidate>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+              <i class="fa-regular fa-envelope text-sky-400 mr-1"></i> College Email Address
+            </label>
+            <input type="email" id="login-email-input" placeholder="e.g. student@college.edu" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs">
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-semibold text-slate-300">
+                <i class="fa-solid fa-lock text-sky-400 mr-1"></i> Password
+              </label>
+              <span class="text-[11px] text-slate-400">Demo pass: <strong class="text-sky-300 font-mono">1234</strong></span>
+            </div>
+            <div class="relative">
+              <input type="password" id="login-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2.5 text-xs">
+              <button type="button" onclick="togglePasswordVisibility('login-password-input', 'toggle-login-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" title="Show/Hide Password" tabindex="-1">
+                <i id="toggle-login-icon" class="fa-regular fa-eye text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="login-submit-btn" class="w-full btn-primary py-3 rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+            <span>Log In to CampusBarter</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+
+          <!-- 1-Click Quick Demo Accounts -->
+          <div class="pt-4 border-t border-white/10 text-center">
+            <p class="text-[11px] text-slate-400 mb-2">Or 1-click test with pre-seeded AI mock accounts:</p>
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button type="button" onclick="quickFillAndLogin('aryanraj.20j@gmail.com', '24865')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500/20 to-purple-500/20 hover:from-indigo-500/35 hover:to-purple-500/35 text-xs text-indigo-300 hover:text-white border border-indigo-500/40 hover:border-indigo-400/60 transition-all font-bold flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-star text-amber-400"></i>
+                  <span>Aryan Raj (Dev)</span>
+                </button>
+                <button type="button" onclick="quickFillAndLogin('aarav@college.edu')" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-xs text-slate-300 hover:text-white border border-white/10 hover:border-indigo-400/40 transition-all flex items-center gap-1.5">
+                  <i class="fa-solid fa-robot text-purple-400"></i>
+                  <span>AI Aarav (CS)</span>
+                </button>
+                <button type="button" onclick="quickFillAndLogin('sneha@college.edu')" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-xs text-slate-300 hover:text-white border border-white/10 hover:border-indigo-400/40 transition-all flex items-center gap-1.5">
+                  <i class="fa-solid fa-robot text-teal-400"></i>
+                  <span>AI Sneha (CS)</span>
+                </button>
+                <button type="button" onclick="quickFillAndLogin('karan@college.edu')" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-xs text-slate-300 hover:text-white border border-white/10 hover:border-indigo-400/40 transition-all flex items-center gap-1.5">
+                  <i class="fa-solid fa-robot text-sky-400"></i>
+                  <span>AI Karan (AI/DS)</span>
+                </button>
+              </div>
+            </div>
+          </form>
+
+        <!-- FORM 2: SIGN UP -->
+        <form id="page-signup-form" class="space-y-3.5 hidden" novalidate>
+          <!-- Welcome Bonus Badge -->
+          <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">
+            <i class="fa-solid fa-sparkles text-amber-400 text-base shrink-0"></i>
+            <div>
+              <p class="font-bold text-amber-300">Welcome Bonus: 300 Karma Points</p>
+              <p class="text-[10px] text-amber-300/80 mt-0.5">Credited immediately to trade barters or download 20 verified PYQs!</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
+            <input type="text" id="signup-name-input" placeholder="e.g. Diya Sharma" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">College Email Address</label>
+            <input type="email" id="signup-email-input" placeholder="e.g. diya.sharma@college.edu" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Department</label>
+              <input type="text" id="signup-department-input" placeholder="e.g. Computer Science, AI/DS" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Current Semester</label>
+              <select id="signup-semester-input" class="w-full glass-input rounded-xl px-3 py-2 text-xs cursor-pointer">
+                <option value="Sem 1">Semester 1</option>
+                <option value="Sem 2">Semester 2</option>
+                <option value="Sem 3">Semester 3</option>
+                <option value="Sem 4">Semester 4</option>
+                <option value="Sem 5" selected>Semester 5</option>
+                <option value="Sem 6">Semester 6</option>
+                <option value="Sem 7">Semester 7</option>
+                <option value="Sem 8">Semester 8</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Skills You Can Teach (Comma-separated)</label>
+            <input type="text" id="signup-teach-input" placeholder="e.g. Java OOP, UI Wireframing, Python" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Skills You Want to Learn (Comma-separated)</label>
+            <input type="text" id="signup-learn-input" placeholder="e.g. Docker, Calculus III, Next.js" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Set Account Password</label>
+            <div class="relative">
+              <input type="password" id="signup-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-xs">
+              <button type="button" onclick="togglePasswordVisibility('signup-password-input', 'toggle-signup-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" title="Show/Hide Password" tabindex="-1">
+                <i id="toggle-signup-icon" class="fa-regular fa-eye text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="signup-submit-btn" class="w-full btn-emerald py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
+            <span>Register & Claim 300 Karma ⚡</span>
+            <i class="fa-solid fa-sparkles"></i>
+          </button>
+        </form>
+
+        <!-- High-Quality Creative Orbital Quantum Loader Overlay -->
+        <div id="auth-quantum-loader" class="orbital-loader-overlay hidden">
+          <div class="orbital-spinner mb-5">
+            <div class="orbital-ring-outer"></div>
+            <div class="orbital-ring-inner"></div>
+            <div class="orbital-core">
+              <i id="loader-core-icon" class="fa-solid fa-arrows-rotate text-emerald-300 text-sm animate-spin"></i>
+            </div>
+          </div>
+          <h4 id="loader-title" class="text-sm font-bold text-white font-heading tracking-wide mb-1 text-center">Connecting to CampusBarter</h4>
+          <p id="loader-subtext" class="text-xs text-blue-200 font-medium text-center">
+            <span class="loading-dots">Preparing campus workspace</span>
+          </p>
+          <div class="w-52 bg-white/10 rounded-full h-1.5 mt-4 overflow-hidden border border-white/10">
+            <div id="loader-progress-bar" class="bg-gradient-to-r from-blue-600 via-teal-400 to-emerald-400 h-full w-1/4 transition-all duration-500"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Info -->
+      <div class="text-center mt-6 text-[11px] text-slate-400">
+        <p>CampusBarter collegiate barter network • <a href="index.html" class="text-indigo-400 hover:underline">Explore Homepage</a></p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-20 py-4 text-center text-xs text-slate-500 border-t border-white/5">
+    © 2025 CampusBarter. Open Collegiate Knowledge & Past Question Paper Exchange.
+  </footer>
+
+  <!-- Supabase JS Client & Dual-Mode Adapter -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+
+  <!-- Standalone Login & Sign Up Logic with Creative Loader & Custom Validation -->
+  <script>
+    // Password Visibility Toggle (Show / Hide Password)
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input || !icon) return;
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+      if (window.SoundFX) SoundFX.playSwitch();
+    }
+
+    // Tab Switching Logic
+    const tabLogin = document.getElementById("tab-login");
+    const tabSignup = document.getElementById("tab-signup");
+    const formLogin = document.getElementById("page-login-form");
+    const formSignup = document.getElementById("page-signup-form");
+    const authTitle = document.getElementById("auth-title");
+    const authSubtitle = document.getElementById("auth-subtitle");
+    const alertBox = document.getElementById("auth-alert");
+
+    function showAlert(message, type = "info") {
+      alertBox.className = "mb-4 p-3.5 rounded-xl text-xs flex items-center gap-2.5 transition-all";
+      let icon = "fa-circle-info";
+      if (type === "success") {
+        alertBox.classList.add("bg-emerald-500/15", "border", "border-emerald-500/30", "text-emerald-300");
+        icon = "fa-circle-check";
+      } else if (type === "error") {
+        alertBox.classList.add("bg-rose-500/15", "border", "border-rose-500/30", "text-rose-300");
+        icon = "fa-circle-exclamation";
+      } else {
+        alertBox.classList.add("bg-amber-500/15", "border", "border-amber-500/30", "text-amber-300");
+      }
+      alertBox.innerHTML = `<i class="fa-solid ${icon} text-sm shrink-0"></i><div class="alert-text-body"></div>`;
+      alertBox.querySelector(".alert-text-body").textContent = message;
+      alertBox.classList.remove("hidden");
+    }
+
+    function hideAlert() {
+      alertBox.classList.add("hidden");
+    }
+
+    function setTab(mode) {
+      hideAlert();
+      clearErrors(formLogin);
+      clearErrors(formSignup);
+      if (mode === "signup") {
+        tabSignup.classList.add("bg-indigo-600", "text-white");
+        tabSignup.classList.remove("text-slate-300");
+        tabLogin.classList.remove("bg-indigo-600", "text-white");
+        tabLogin.classList.add("text-slate-300");
+        formLogin.classList.add("hidden");
+        formSignup.classList.remove("hidden");
+        authTitle.innerText = "Create Your Account";
+        authSubtitle.innerText = "Join the barter network & get 300 Karma bonus instantly.";
+        window.location.hash = "#signup";
+      } else {
+        tabLogin.classList.add("bg-indigo-600", "text-white");
+        tabLogin.classList.remove("text-slate-300");
+        tabSignup.classList.remove("bg-indigo-600", "text-white");
+        tabSignup.classList.add("text-slate-300");
+        formSignup.classList.add("hidden");
+        formLogin.classList.remove("hidden");
+        authTitle.innerText = "Welcome Back";
+        authSubtitle.innerText = "Sign in to manage your swaps, karma, and PYQ vault.";
+        window.location.hash = "#login";
+      }
+    }
+
+    tabLogin.addEventListener("click", () => {
+      setTab("login");
+      if (window.SoundFX) SoundFX.playPop();
+    });
+    tabSignup.addEventListener("click", () => {
+      setTab("signup");
+      if (window.SoundFX) SoundFX.playPop();
+    });
+
+    if (window.location.hash === "#signup") { setTab("signup"); }
+    // =========================================================================
+    // SEED DEMO ACCOUNTS & LOCALSTORAGE CACHE INITIALIZATION
+    // =========================================================================
+    const SEED_DEMO_ACCOUNTS = [
+  {
+    id: "usr-aryan",
+    name: "Aryan Raj",
+    isAi: false,
+    email: "aryanraj.20j@gmail.com",
+    password: "24865",
+    department: "Computer Science & Engineering",
+    semester: "Sem 5",
+    karma: 300,
+    swapsCompleted: 3,
+    pyqsUploaded: 2,
+    downloads: 5,
+    avatar: "assets/images/avatar-default.jpg",
+    teachSkills: ["Full Stack Web Dev", "Python & DSA"],
+    learnSkills: ["UI/UX Design", "System Architecture"]
+  },
+      {
+        id: "usr-1",
+        name: "AI Aarav Patel",
+        isAi: true,
+        email: "aarav@college.edu",
+        password: "1234",
+        department: "Computer Science",
+        semester: "Sem 5",
+        karma: 450,
+        swapsCompleted: 12,
+        pyqsUploaded: 4,
+        downloads: 18,
+        avatar: "assets/images/avatar-aarav.jpg",
+        teachSkills: ["DSA in C++", "Graph Algorithms"],
+        learnSkills: ["React 19", "System Architecture"]
+      },
+      {
+        id: "usr-2",
+        name: "AI Sneha Mukherjee",
+        isAi: true,
+        email: "sneha@college.edu",
+        password: "1234",
+        department: "Computer Science",
+        semester: "Sem 6",
+        karma: 640,
+        swapsCompleted: 14,
+        pyqsUploaded: 5,
+        downloads: 24,
+        avatar: "assets/images/avatar-sneha.jpg",
+        teachSkills: ["React 19 & Next.js", "Tailwind CSS"],
+        learnSkills: ["BGP Routing", "OS Memory Paging"]
+      },
+      {
+        id: "usr-3",
+        name: "AI Karan Johal",
+        isAi: true,
+        email: "karan@college.edu",
+        password: "1234",
+        department: "Data Science & AI",
+        semester: "Sem 4",
+        karma: 430,
+        swapsCompleted: 9,
+        pyqsUploaded: 2,
+        downloads: 8,
+        avatar: "assets/images/avatar-karan.jpg",
+        teachSkills: ["Python for AI", "NumPy & Pandas"],
+        learnSkills: ["SQL Subqueries", "DBMS Indexing"]
+      }
+    ];
+
+    function ensureAccountsSeeded() {
+      try {
+        const stored = localStorage.getItem("cb_accounts");
+        if (!stored || stored === "[]") {
+          localStorage.setItem("cb_accounts", JSON.stringify(SEED_DEMO_ACCOUNTS));
+          return [...SEED_DEMO_ACCOUNTS];
+        }
+        let list = JSON.parse(stored);
+        let changed = false;
+        SEED_DEMO_ACCOUNTS.forEach(demo => {
+          if (!list.some(a => a.email.toLowerCase() === demo.email.toLowerCase())) {
+            list.push(demo);
+            changed = true;
+          }
+        });
+        if (changed) {
+          localStorage.setItem("cb_accounts", JSON.stringify(list));
+        }
+        return list;
+      } catch (e) {
+        return [...SEED_DEMO_ACCOUNTS];
+      }
+    }
+
+    // Seed on script execution
+    ensureAccountsSeeded();
+
+    window.addEventListener("hashchange", () => {
+      if (window.location.hash === "#signup") {
+        setTab("signup");
+      } else {
+        setTab("login");
+      }
+    });
+
+
+    // =========================================================================
+    // CREATIVE ATOMIC DUAL-RING GYRO SPINNER & INLINE LOADER CONTROLLERS
+    // =========================================================================
+    function createKineticSpinner(isMini = false) {
+      const miniClass = isMini ? " mini" : "";
+      return `
+        <span class="kinetic-gyro-spinner${miniClass}" aria-hidden="true">
+          <span class="gyro-ring-outer"></span>
+          <span class="gyro-ring-inner"></span>
+          <span class="gyro-core"></span>
+        </span>
+      `;
+    }
+
+    function setButtonLoading(button, isLoading, loadingText = "Processing...") {
+      if (!button) return;
+      if (isLoading) {
+        if (!button.dataset.originalHtml) {
+          button.dataset.originalHtml = button.innerHTML;
+        }
+        button.disabled = true;
+        button.classList.add("btn-loading");
+        button.innerHTML = `
+          <span class="kinetic-loader-wrap">
+            ${createKineticSpinner(false)}
+            <span>${loadingText}</span>
+          </span>
+        `;
+      } else {
+        button.disabled = false;
+        button.classList.remove("btn-loading");
+        if (button.dataset.originalHtml) {
+          button.innerHTML = button.dataset.originalHtml;
+          delete button.dataset.originalHtml;
+        }
+      }
+    }
+
+    function showEnergyBeam(form) {
+      if (!form) return;
+      let beam = form.querySelector(".inline-energy-beam");
+      if (!beam) {
+        beam = document.createElement("div");
+        beam.className = "inline-energy-beam";
+        beam.innerHTML = `<span class="energy-beam-spark"></span>`;
+        const submitBtn = form.querySelector("button[type='submit']");
+        if (submitBtn) {
+          submitBtn.parentNode.insertBefore(beam, submitBtn);
+        } else {
+          form.appendChild(beam);
+        }
+      }
+    }
+
+    function hideEnergyBeam(form) {
+      if (!form) return;
+      const beam = form.querySelector(".inline-energy-beam");
+      if (beam) beam.remove();
+    }
+
+    // Compatibility stubs
+    function showQuantumLoader() {}
+    function updateQuantumLoader() {}
+    function hideQuantumLoader() {}
+
+    // =========================================================================
+    // CUSTOM FORM VALIDATION (Replaces default browser tooltips)
+    // =========================================================================
+    function clearErrors(form) {
+      form.querySelectorAll(".field-error-input").forEach(el => el.classList.remove("field-error-input"));
+      form.querySelectorAll(".field-error-tooltip").forEach(el => el.remove());
+    }
+
+    function showFieldError(input, message) {
+      if (!input) return;
+      input.classList.remove("field-error-input");
+      void input.offsetWidth; // Force reflow for instant re-shake
+      input.classList.add("field-error-input");
+      
+      // Locate insertion point (outside .relative wrapper if present)
+      const anchor = input.closest(".relative") || input;
+      let existing = anchor.nextElementSibling;
+      if (existing && existing.classList.contains("field-error-tooltip")) {
+        const span = existing.querySelector(".error-text-content") || existing.querySelector("span:not(.error-icon-wrapper)");
+        if (span) span.textContent = message;
+      } else {
+        const tooltip = document.createElement("div");
+        tooltip.className = "field-error-tooltip";
+        tooltip.setAttribute("role", "alert");
+        tooltip.innerHTML = `
+          <span class="error-icon-wrapper" aria-hidden="true">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span class="error-ping"></span>
+          </span>
+          <span class="error-text-content"></span>
+        `;
+        tooltip.querySelector(".error-text-content").textContent = message;
+        anchor.insertAdjacentElement("afterend", tooltip);
+      }
+
+      // Play sound effect if enabled
+      if (window.SoundFX && typeof window.SoundFX.playError === "function") {
+        if (!window._lastValidationSound || Date.now() - window._lastValidationSound > 250) {
+          window._lastValidationSound = Date.now();
+          window.SoundFX.playError();
+        }
+      }
+
+      // Automatically remove error when student starts typing
+      const clearHandler = () => {
+        input.classList.remove("field-error-input");
+        const tip = (input.closest(".relative") || input).nextElementSibling;
+        if (tip && tip.classList.contains("field-error-tooltip")) {
+          tip.remove();
+        }
+        input.removeEventListener("input", clearHandler);
+        input.removeEventListener("change", clearHandler);
+      };
+      input.addEventListener("input", clearHandler);
+      input.addEventListener("change", clearHandler);
+    }
+
+    // 1-Click Quick Demo Login
+    function quickFillAndLogin(email, password = '1234') {
+      clearErrors(formLogin);
+      ensureAccountsSeeded();
+      const emailInput = document.getElementById("login-email-input");
+      const passInput = document.getElementById("login-password-input");
+      if (emailInput) emailInput.value = email;
+      if (passInput) passInput.value = password;
+      if (window.SoundFX) SoundFX.playPop();
+      formLogin.dispatchEvent(new Event("submit"));
+    }
+
+    // =========================================================================
+    // FORM 1: LOGIN SUBMIT HANDLER (Inline Kinetic Loader + Custom Validation)
+    // =========================================================================
+    formLogin.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErrors(formLogin);
+      hideAlert();
+
+      const emailInput = document.getElementById("login-email-input");
+      const passwordInput = document.getElementById("login-password-input");
+      const submitBtn = document.getElementById("login-submit-btn");
+      const email = emailInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      // Custom Validation
+      let hasError = false;
+      let firstErrorField = null;
+
+      if (!email) {
+        showFieldError(emailInput, "Please enter your college email address");
+        hasError = true;
+        firstErrorField = emailInput;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError(emailInput, "Please enter a valid email (e.g. name@college.edu)");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = emailInput;
+      }
+
+      if (!password) {
+        showFieldError(passwordInput, "Please enter your password");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = passwordInput;
+      }
+
+      if (hasError) {
+        if (firstErrorField) firstErrorField.focus();
+        return;
+      }
+
+      // Activate Inline Kinetic Loader & Neon Energy Flow Beam
+      showEnergyBeam(formLogin);
+      setButtonLoading(submitBtn, true, "Verifying Student ID...");
+
+      try {
+        let loggedUser = null;
+
+        // Visual cadence for kinetic gyro spinner
+        await new Promise(r => setTimeout(r, 450));
+
+        if (typeof DataManager !== "undefined" && DataManager.isOnline()) {
+          try {
+            loggedUser = await DataManager.logIn(email, password);
+          } catch (cloudErr) {
+            console.warn("Cloud auth notice, checking local accounts:", cloudErr.message);
+          }
+        }
+
+        // Fallback to LocalStorage accounts
+        if (!loggedUser) {
+          const accounts = ensureAccountsSeeded();
+          const localAcc = accounts.find(a => a.email.toLowerCase() === email);
+          if (!localAcc) {
+            throw new Error("No account found with this email. Please switch to Sign Up!");
+          }
+          if (localAcc.password && localAcc.password !== password) {
+            throw new Error("Incorrect password. Demo password is: 1234");
+          }
+          loggedUser = typeof normalizeProfile === "function" ? normalizeProfile(localAcc) : localAcc;
+          localStorage.setItem("cb_current_user", JSON.stringify(loggedUser));
+        } else {
+          loggedUser = typeof normalizeProfile === "function" ? normalizeProfile(loggedUser) : loggedUser;
+          localStorage.setItem("cb_current_user", JSON.stringify(loggedUser));
+        }
+
+        // Step 2: Success Animation inside button
+        if (window.SoundFX) SoundFX.playSuccess();
+        const userName = loggedUser && loggedUser.name ? loggedUser.name : "Scholar";
+        if (submitBtn) {
+          submitBtn.innerHTML = `
+            <span class="kinetic-loader-wrap text-emerald-300">
+              <i class="fa-solid fa-circle-check text-sm animate-bounce"></i>
+              <span>Welcome back, ${userName}!</span>
+            </span>
+          `;
+        }
+        await new Promise(r => setTimeout(r, 650));
+        window.location.replace("index.html");
+
+      } catch (err) {
+        if (window.SoundFX) SoundFX.playError();
+        hideEnergyBeam(formLogin);
+        setButtonLoading(submitBtn, false);
+        showAlert(err.message, "error");
+        if (err.message.includes("password")) {
+          showFieldError(passwordInput, "Incorrect password. Demo password is 1234");
+          passwordInput.focus();
+        } else if (err.message.includes("email") || err.message.includes("account")) {
+          showFieldError(emailInput, err.message);
+          emailInput.focus();
+        }
+      }
+    });
+
+    // =========================================================================
+    // FORM 2: SIGN UP SUBMIT HANDLER (Inline Kinetic Loader + Custom Validation)
+    // =========================================================================
+    formSignup.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErrors(formSignup);
+      hideAlert();
+
+      const nameInput = document.getElementById("signup-name-input");
+      const emailInput = document.getElementById("signup-email-input");
+      const deptInput = document.getElementById("signup-department-input");
+      const semInput = document.getElementById("signup-semester-input");
+      const teachInput = document.getElementById("signup-teach-input");
+      const learnInput = document.getElementById("signup-learn-input");
+      const passInput = document.getElementById("signup-password-input");
+      const signupBtn = document.getElementById("signup-submit-btn");
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim().toLowerCase();
+      const department = deptInput.value.trim();
+      const semester = semInput.value;
+      const teachRaw = teachInput.value.trim();
+      const learnRaw = learnInput.value.trim();
+      const password = passInput.value;
+
+      // Custom Validation for All Fields
+      let hasError = false;
+      let firstErrorField = null;
+
+      if (!name) {
+        showFieldError(nameInput, "Please enter your full name");
+        hasError = true;
+        firstErrorField = nameInput;
+      }
+
+      if (!email) {
+        showFieldError(emailInput, "Please enter your college email address");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = emailInput;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError(emailInput, "Please enter a valid college email (e.g. name@college.edu)");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = emailInput;
+      }
+
+      if (!department) {
+        showFieldError(deptInput, "Please fill in your department name");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = deptInput;
+      }
+
+      if (!teachRaw) {
+        showFieldError(teachInput, "Please enter skills you can teach (e.g. C++, Java, Calculus)");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = teachInput;
+      }
+
+      if (!learnRaw) {
+        showFieldError(learnInput, "Please enter skills you want to learn (e.g. Python, Docker)");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = learnInput;
+      }
+
+      if (!password) {
+        showFieldError(passInput, "Please set an account password");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = passInput;
+      } else if (password.length < 4) {
+        showFieldError(passInput, "Password must be at least 4 characters");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = passInput;
+      }
+
+      if (hasError) {
+        if (firstErrorField) firstErrorField.focus();
+        return;
+      }
+
+      const teachSkills = teachRaw.split(",").map(s => s.trim()).filter(Boolean);
+      const learnSkills = learnRaw.split(",").map(s => s.trim()).filter(Boolean);
+
+      // Activate Inline Kinetic Loader & Neon Energy Flow Beam
+      showEnergyBeam(formSignup);
+      setButtonLoading(signupBtn, true, "Allocating 300⚡ Karma...");
+
+      try {
+        const metadata = {
+          name: name,
+          department: department,
+          semester: semester,
+          teachSkills: teachSkills.length > 0 ? teachSkills : ["General Studies"],
+          learnSkills: learnSkills.length > 0 ? learnSkills : ["Programming"],
+          avatar: "assets/images/avatar-default.jpg"
+        };
+
+        const accounts = ensureAccountsSeeded();
+        if (accounts.some(a => a.email.toLowerCase() === email)) {
+          throw new Error("An account with this email already exists. Please log in!");
+        }
+
+        let newUser = null;
+
+        // Visual cadence for kinetic gyro spinner
+        await new Promise(r => setTimeout(r, 500));
+
+        // Try Supabase Cloud Sign-Up
+        if (typeof DataManager !== "undefined" && DataManager.isOnline()) {
+          try {
+            newUser = await DataManager.signUp(email, password, metadata);
+          } catch (cloudErr) {
+            console.warn("Cloud signup warning, falling back to local storage:", cloudErr.message);
+          }
+        }
+
+        if (!newUser) {
+          newUser = {
+            id: `usr-${Date.now()}`,
+            name: name,
+            email: email,
+            password: password,
+            department: department,
+            semester: semester,
+            karma: 300, // Strict rule: 300 Welcome Gift (Karma Token Economy)
+            lastRefillTime: Date.now(),
+            isAi: false,
+            swapsCompleted: 0,
+            pyqsUploaded: 0,
+            downloads: 0,
+            avatar: "assets/images/avatar-default.jpg",
+            teachSkills: metadata.teachSkills,
+            learnSkills: metadata.learnSkills
+          };
+          accounts.push(newUser);
+          localStorage.setItem("cb_accounts", JSON.stringify(accounts));
+        }
+
+        newUser = typeof normalizeProfile === "function" ? normalizeProfile(newUser) : newUser;
+        localStorage.setItem("cb_current_user", JSON.stringify(newUser));
+
+        // Step 2: Success Feedback in button
+        if (window.SoundFX) SoundFX.playSuccess();
+        if (signupBtn) {
+          signupBtn.innerHTML = `
+            <span class="kinetic-loader-wrap text-emerald-300">
+              <i class="fa-solid fa-gift text-sm animate-bounce"></i>
+              <span>Account Created! +300⚡</span>
+            </span>
+          `;
+        }
+        await new Promise(r => setTimeout(r, 700));
+        window.location.replace("index.html");
+
+      } catch (err) {
+        if (window.SoundFX) SoundFX.playError();
+        hideEnergyBeam(formSignup);
+        setButtonLoading(signupBtn, false);
+        showAlert(err.message, "error");
+        if (err.message.includes("already exists")) {
+          showFieldError(emailInput, "This email is already registered. Please log in!");
+          emailInput.focus();
+        }
+      }
+    });
+
+    // Initialize SFX Toggle Button
+    if (window.SoundFX) {
+      SoundFX.bindToggleBtn('#sfx-toggle-btn', '#sfx-toggle-icon', '#sfx-toggle-label');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1176 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusBarter | Trade Skills & Academic Resource Hub</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            accent: {
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#8b5cf6',
+            }
+          },
+          fontFamily: {
+            heading: ['Outfit', 'sans-serif'],
+            body: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Custom Glassmorphism Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Procedural Web Audio Sound Engine -->
+  <script src="sound-fx.js"></script>
+</head>
+<body id="home" class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- ========================================================================
+       CREATIVE INTRO PRELOADER (Ultra-Smooth Holographic Entrance)
+       ======================================================================== -->
+  <div id="app-preloader" class="preloader-overlay">
+    <div class="preloader-ambient-glow"></div>
+    <div class="preloader-content">
+      <!-- Animated Futuristic Orbital Brand Crest -->
+      <div class="preloader-logo-wrapper">
+        <div class="preloader-orbit-outer"></div>
+        <div class="preloader-orbit-mid"></div>
+        <div class="preloader-orbit-inner">
+          <i class="fa-solid fa-repeat preloader-icon"></i>
+        </div>
+      </div>
+
+      <!-- Brand Title & Tagline -->
+      <div class="preloader-brand">
+        <h1 class="preloader-title">Campus<span class="text-emerald-400">Barter</span></h1>
+        <p class="preloader-subtitle">Student Skill Exchange & Exam Resource Vault</p>
+      </div>
+
+      <!-- Smooth Neon Progress Bar -->
+      <div class="preloader-progress-box">
+        <div class="preloader-progress-track">
+          <div id="preloader-progress-bar" class="preloader-progress-fill">
+            <div class="preloader-progress-glow"></div>
+          </div>
+        </div>
+        <div class="preloader-progress-info">
+          <span id="preloader-status-text" class="preloader-status">Preparing campus workspace...</span>
+          <span id="preloader-percentage" class="preloader-pct">0%</span>
+        </div>
+      </div>
+
+      <!-- Interactive Audio Prompt -->
+      <div id="preloader-audio-prompt" class="preloader-audio-prompt" title="Click anywhere to activate sound">
+        <i class="fa-solid fa-volume-high text-emerald-400"></i>
+        <span>Click anywhere to launch with sound</span>
+      </div>
+
+      <!-- Quick Skip Option -->
+      <button id="preloader-skip-btn" class="preloader-skip" title="Enter instantly">
+        <span>Enter Instantly</span>
+        <i class="fa-solid fa-forward-step text-[10px]"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="bg-ambient-orb orb-1"></div>
+  <div class="bg-ambient-orb orb-2"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- ========================================================================
+       TOP NAVIGATION BAR (Glassmorphism & Live Multi-Account Auth Zone)
+       ======================================================================== -->
+  <header class="sticky top-0 z-40 glass-nav px-4 sm:px-8 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo & Tagline -->
+      <a href="#home" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
+            <i class="fa-solid fa-repeat text-indigo-400 text-lg group-hover:rotate-180 transition-transform duration-500"></i>
+          </div>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight font-heading text-white">Campus<span class="text-emerald-400">Barter</span></span>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Collaborative Student Exchange Platform</p>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden md:flex items-center gap-1.5 text-sm font-medium">
+        <a href="#home" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-house text-indigo-400 text-xs"></i> Home
+        </a>
+        <a href="#about-section" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-info text-sky-400 text-xs"></i> About
+        </a>
+        <a href="#pyq-section" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-file-lines text-amber-400 text-xs"></i> PYQ Bank
+        </a>
+        <a href="#swaps-section" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-timeline text-purple-400 text-xs"></i> Swaps
+          <span id="nav-swap-count" class="px-1.5 py-0.2 rounded-full text-xs bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 font-semibold">0</span>
+        </a>
+        <a href="#profiles-section" class="px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-1.5">
+          <i class="fa-solid fa-users text-emerald-400 text-xs"></i> Peers
+        </a>
+      </nav>
+
+      <!-- Auth & User Profile Zone (Dynamic: Logged Out vs Logged In) -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- SFX Audio Control Toggle -->
+        <button id="sfx-toggle-btn" class="btn-glass px-2.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-300 hover:text-white" title="Toggle Sound Effects" aria-label="Toggle Sound Effects">
+          <i id="sfx-toggle-icon" class="fa-solid fa-volume-high text-emerald-400"></i>
+          <span id="sfx-toggle-label" class="hidden sm:inline text-[11px] font-mono">SFX ON</span>
+        </button>
+
+
+        <div id="nav-auth-zone" class="flex items-center gap-3">
+          <a href="login.html#login" class="btn-glass text-xs px-3.5 py-2 rounded-xl font-medium cursor-pointer">Log In</a>
+          <a href="login.html#signup" class="btn-emerald text-xs px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/25 cursor-pointer">
+            <i class="fa-solid fa-sparkles"></i> Sign Up (+300 Karma)
+          </a>
+        </div>
+
+        <button id="mobile-menu-toggle" class="md:hidden text-slate-300 hover:text-white p-2 rounded-lg bg-white/5 border border-white/10">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-nav" class="hidden md:hidden pt-4 pb-2 border-t border-white/10 mt-3 flex flex-col gap-2 text-sm">
+      <a href="#home" class="px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 flex items-center gap-2"><i class="fa-solid fa-house text-indigo-400"></i> Home</a>
+      <a href="#about-section" class="px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 flex items-center gap-2"><i class="fa-solid fa-circle-info text-sky-400"></i> About CampusBarter</a>
+      <a href="#pyq-section" class="px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 flex items-center gap-2"><i class="fa-solid fa-file-lines text-amber-400"></i> PYQ Bank</a>
+      <a href="#swaps-section" class="px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 flex items-center gap-2"><i class="fa-solid fa-timeline text-purple-400"></i> Swap Tracker</a>
+      <a href="#profiles-section" class="px-3 py-2 rounded-lg text-slate-300 hover:bg-white/10 flex items-center gap-2"><i class="fa-solid fa-users text-emerald-400"></i> Peer Network</a>
+      <div id="mobile-auth-controls" class="pt-2 border-t border-white/10 flex flex-col gap-2">
+        <a href="login.html#login" class="w-full btn-glass text-xs py-2 rounded-xl font-medium text-center cursor-pointer">Log In</a>
+        <a href="login.html#signup" class="w-full btn-emerald text-xs py-2 rounded-xl font-bold text-center cursor-pointer">Sign Up (+300 Karma)</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       HERO & VALUE BANNER
+       ======================================================================== -->
+  <section class="relative z-10 pt-8 pb-6 px-4 sm:px-8 max-w-7xl mx-auto">
+    <div class="glass-card p-6 sm:p-10 border-white/15 relative overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div class="lg:col-span-8">
+          <div class="reveal-item stagger-1 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/25 text-blue-200 text-xs font-semibold mb-4 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>🎓 Peer-to-Peer Campus Network &bull; 300&#9889; Starting Karma &bull; +30/hr Automatic Refill</span>
+          </div>
+          <h1 class="reveal-item stagger-2 text-3xl sm:text-5xl font-extrabold tracking-tight font-heading leading-tight text-white mb-4">
+            Trade Skills & Share Notes.<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-400 to-emerald-400">
+              Ace College Exams Together.
+            </span>
+          </h1>
+          <p class="reveal-item stagger-3 text-slate-300 text-sm sm:text-base max-w-2xl leading-relaxed mb-6">
+            The authentic collegiate barter community where students exchange what they excel at for what they need. Trade Python practice for Calculus revision, download verified past semester papers, and earn karma helping peers.
+          </p>
+
+          <div class="reveal-item stagger-4 flex flex-wrap items-center gap-3">
+            <a href="#swaps-section" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/25">
+              <i class="fa-solid fa-arrows-rotate"></i>
+              <span>Active Swaps</span>
+            </a>
+            <a href="#pyq-section" class="btn-glass px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2">
+              <i class="fa-solid fa-file-pdf text-amber-400"></i>
+              <span>PYQ Archive</span>
+            </a>
+            <a href="#profiles-section" class="btn-glass px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2">
+              <i class="fa-solid fa-users text-emerald-400"></i>
+              <span>Peer Network</span>
+            </a>
+            <a href="#about-section" class="btn-glass px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-300 hover:text-white">
+              <i class="fa-solid fa-circle-question text-sky-400"></i>
+              <span>How It Works</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="reveal-item stagger-5 lg:col-span-4 grid grid-cols-2 gap-3">
+          <div class="glass-card p-4 text-center border-white/10 bg-slate-900/60">
+            <div id="stat-total-swaps" class="text-2xl font-black font-heading text-blue-400">0</div>
+            <div class="text-xs text-slate-400 mt-1">Active Swaps</div>
+          </div>
+          <div class="glass-card p-4 text-center border-white/10 bg-slate-900/60">
+            <div id="stat-total-pyqs" class="text-2xl font-black font-heading text-emerald-400">0</div>
+            <div class="text-xs text-slate-400 mt-1">Archived Papers</div>
+          </div>
+          <div class="glass-card p-4 text-center border-white/10 bg-slate-900/60">
+            <div id="stat-total-peers" class="text-2xl font-black font-heading text-sky-400">0</div>
+            <div class="text-xs text-slate-400 mt-1">Peer Mentors</div>
+          </div>
+          <div class="glass-card p-4 text-center border-white/10 bg-slate-900/60">
+            <div class="text-2xl font-black font-heading text-amber-400">300⚡</div>
+            <div class="text-xs text-slate-400 mt-1">Welcome Gift</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MODULE 1: PREVIOUS YEAR QUESTION (PYQ) BANK & RESOURCE REPOSITORY
+       ======================================================================== -->
+  <section id="pyq-section" class="relative z-10 py-8 px-4 sm:px-8 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div>
+        <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">
+          <i class="fa-solid fa-box-archive"></i>
+          <span>Academic Resource Vault</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-white">Previous Year Question Papers</h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">Browse, filter, preview, or upload question papers (+25 Karma points).</p>
+      </div>
+
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <a href="https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link" target="_blank" class="btn-glass text-xs px-3.5 py-2.5 rounded-xl font-bold flex items-center gap-2 text-emerald-300 hover:text-white border-emerald-500/30 hover:bg-emerald-500/20 transition-all shadow-sm" title="Open Official Google Drive Archive">
+          <i class="fa-brands fa-google-drive text-emerald-400 text-sm"></i>
+          <span>Official Drive Archive</span>
+        </a>
+        <button id="trigger-upload-banner-btn" class="btn-emerald text-xs px-4 py-2.5 rounded-xl font-bold flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Upload Paper (+25⚡)</span>
+        </button>
+        <span id="pyq-count-badge" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-indigo-300 font-semibold">
+          Loading...
+        </span>
+      </div>
+    </div>
+
+    <!-- Filter Control Bar -->
+    <div class="glass-card p-4 sm:p-5 mb-6 border-white/10">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
+        <!-- Search Input -->
+        <div class="lg:col-span-4 relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="pyq-search-input" placeholder="Search subject, code (e.g. CS-301), or contributor..." class="w-full glass-input rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-400">
+        </div>
+
+        <!-- Subject Filter -->
+        <div class="lg:col-span-3">
+          <select id="filter-subject" class="w-full glass-input rounded-xl px-3 py-2.5 text-xs cursor-pointer">
+            <option value="ALL">All Subjects</option>
+          </select>
+        </div>
+
+        <!-- Semester Filter -->
+        <div class="lg:col-span-2">
+          <select id="filter-semester" class="w-full glass-input rounded-xl px-3 py-2.5 text-xs cursor-pointer">
+            <option value="ALL">All Semesters</option>
+          </select>
+        </div>
+
+        <!-- Exam Type Filter -->
+        <div class="lg:col-span-2">
+          <select id="filter-exam-type" class="w-full glass-input rounded-xl px-3 py-2.5 text-xs cursor-pointer">
+            <option value="ALL">All Exam Types</option>
+            <option value="CIA-1">CIA-1</option>
+            <option value="CIA-2">CIA-2</option>
+            <option value="Semester End">Semester End</option>
+          </select>
+        </div>
+
+        <!-- Reset Filters Button -->
+        <div class="lg:col-span-1 flex justify-end">
+          <button id="btn-reset-pyq-filters" title="Reset Filters" class="w-full btn-glass py-2.5 px-3 rounded-xl text-xs flex items-center justify-center text-slate-400 hover:text-white">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PYQ Papers Grid Container -->
+    <div id="pyq-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="pyq-empty-state" class="hidden text-center py-14 glass-card border-white/10 mt-4">
+      <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 text-xl mx-auto mb-3">
+        <i class="fa-regular fa-folder-open"></i>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1">No question papers match your filters</h3>
+      <p class="text-xs text-slate-400 max-w-sm mx-auto mb-4">Try clearing your filters or be the first student to upload this paper for +25 Karma!</p>
+      <button id="reset-filters-empty-btn" class="btn-primary text-xs px-4 py-2 rounded-xl">Clear All Filters</button>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MODULE 2: SWAP STATE MACHINE TRACKER (Pending -> Accepted -> Scheduled -> Completed)
+       ======================================================================== -->
+  <section id="swaps-section" class="relative z-10 py-8 px-4 sm:px-8 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div>
+        <div class="flex items-center gap-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">
+          <i class="fa-solid fa-network-wired"></i>
+          <span>Peer State Pipeline</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-white">Active Swap State Machine</h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">Track your 4-phase learning exchanges. Both members receive +50 Karma upon completion.</p>
+      </div>
+
+      <!-- Action Button to Trigger New Barter Modal -->
+      <button id="trigger-create-swap-btn" class="btn-primary text-xs px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 self-start md:self-auto">
+        <i class="fa-solid fa-plus"></i>
+        <span>Propose New Barter</span>
+      </button>
+    </div>
+
+    <!-- State Transition Tabs / Pipeline Filter -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 mb-6 scrollbar-none">
+      <button data-status="ALL" class="swap-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600/40 text-white border border-indigo-500/50 flex items-center gap-2">
+        <span>All Swaps</span>
+        <span id="count-all" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">0</span>
+      </button>
+      <button data-status="PENDING" class="swap-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-slate-400 border border-white/10 hover:text-white flex items-center gap-2">
+        <i class="fa-solid fa-hourglass-half text-amber-400 text-[11px]"></i>
+        <span>Pending</span>
+        <span id="count-pending" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10">0</span>
+      </button>
+      <button data-status="ACCEPTED" class="swap-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-slate-400 border border-white/10 hover:text-white flex items-center gap-2">
+        <i class="fa-solid fa-check text-sky-400 text-[11px]"></i>
+        <span>Accepted</span>
+        <span id="count-accepted" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10">0</span>
+      </button>
+      <button data-status="SCHEDULED" class="swap-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-slate-400 border border-white/10 hover:text-white flex items-center gap-2">
+        <i class="fa-solid fa-calendar-days text-purple-400 text-[11px]"></i>
+        <span>Scheduled</span>
+        <span id="count-scheduled" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10">0</span>
+      </button>
+      <button data-status="COMPLETED" class="swap-filter-btn px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-slate-400 border border-white/10 hover:text-white flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-[11px]"></i>
+        <span>Completed (+50⚡)</span>
+        <span id="count-completed" class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10">0</span>
+      </button>
+    </div>
+
+    <!-- Active Swaps Cards Container -->
+    <div id="swaps-card-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- Empty State for Swaps -->
+    <div id="swaps-empty-state" class="hidden text-center py-14 glass-card border-white/10 mt-4">
+      <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 text-xl mx-auto mb-3">
+        <i class="fa-solid fa-handshake-slash"></i>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1">No active swaps yet</h3>
+      <p class="text-xs text-slate-400 max-w-sm mx-auto mb-4">You have no active skill exchanges. Propose your first barter with any student peer below!</p>
+      <button onclick="document.getElementById('trigger-create-swap-btn')?.click()" class="btn-primary text-xs px-4 py-2 rounded-xl inline-flex items-center gap-2">
+        <i class="fa-solid fa-plus"></i> Propose a Barter
+      </button>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MODULE 3: STUDENT PROFILES & SKILLS TAGS DIRECTORY
+       ======================================================================== -->
+  <section id="profiles-section" class="relative z-10 py-8 px-4 sm:px-8 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div>
+        <div class="flex items-center gap-2 text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-1">
+          <i class="fa-solid fa-users"></i>
+          <span>Peer Network Directory</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-white">Student Peer Profiles</h2>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">Connect with verified campus peers offering skills you need and seeking skills you have.</p>
+      </div>
+
+      <!-- Department Filter Pills & Quick Edit Profile Button -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button id="section-edit-profile-btn" onclick="openEditProfileModal()" class="btn-glass px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-300 hover:text-white border-indigo-500/30 flex items-center gap-2 hover:bg-indigo-500/20 transition-all shadow-sm">
+          <i class="fa-solid fa-user-pen text-indigo-400"></i>
+          <span>Edit My Profile & Skills</span>
+        </button>
+        <span class="text-xs text-slate-400 hidden sm:inline ml-1">Department:</span>
+        <select id="filter-peer-dept" class="glass-input rounded-xl px-3 py-2 text-xs cursor-pointer">
+          <option value="ALL">All Departments</option>
+          <option value="Computer Science">Computer Science</option>
+          <option value="Data Science & AI">Data Science & AI</option>
+          <option value="Information Technology">Information Technology</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Student Cards Container -->
+    <div id="peer-profiles-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       ABOUT SECTION: HOW CAMPUSBARTER WORKS
+       ======================================================================== -->
+  <section id="about-section" class="relative z-10 py-12 px-4 sm:px-8 max-w-7xl mx-auto">
+    <div class="glass-card p-6 sm:p-10 border-white/15 relative overflow-hidden">
+      <!-- Ambient Glow Behind About -->
+      <div class="absolute -right-20 -top-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="text-center max-w-3xl mx-auto mb-10">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/15 border border-sky-400/30 text-sky-300 mb-3">
+          <i class="fa-solid fa-circle-info text-[11px]"></i> ABOUT CAMPUSBARTER
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold font-heading text-white tracking-tight mb-3">
+          Decentralized Knowledge Exchange & Academic Archive
+        </h2>
+        <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+          CampusBarter is a collegiate peer-to-peer ecosystem where students trade their academic strengths, review verified previous year exam papers, and earn Karma without transactional money.
+        </p>
+      </div>
+
+      <!-- 3 Core Karma Rule Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+        <!-- Rule 1: Welcome Bonus -->
+        <div class="glass-card p-6 border-white/10 hover:border-amber-400/30 transition-all group">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">RULE 1</span>
+            <span class="text-xs text-amber-400 font-semibold">+300 Karma Welcome</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2 font-heading">Instant Registration Bonus</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Every new student receives 300 Karma points immediately upon sign-up, plus an automated recharge of +30 Karma per hour (refilling +60⚡ every 2 hours, capped at 120⚡ max)! Use your karma right away to trade barters or access verified past question papers.
+          </p>
+        </div>
+
+        <!-- Rule 2: PYQ Upload Bonus -->
+        <div class="glass-card p-6 border-white/10 hover:border-emerald-400/30 transition-all group">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">RULE 2</span>
+            <span class="text-xs text-emerald-400 font-semibold">+25 Karma per Paper</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2 font-heading">Crowdsourced Question Vault</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Upload verified CIA-1, CIA-2, or Semester End exam papers with optional solutions. Every published paper earns you +25 Karma points to fuel your barter journey.
+          </p>
+        </div>
+
+        <!-- Rule 3: Win-Win Barter Bonus -->
+        <div class="glass-card p-6 border-white/10 hover:border-indigo-400/30 transition-all group">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-handshake-angle"></i>
+          </div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">RULE 3</span>
+            <span class="text-xs text-indigo-400 font-semibold">+50 Karma to Both</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2 font-heading">Equal Reward Completion</h3>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            When you teach what you know and learn what you need, marking the swap completed automatically awards +50 Karma to both participants (+100 generated in total).
+          </p>
+        </div>
+      </div>
+
+      <!-- Platform Values & CTA Strip -->
+      <div class="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-1 text-center md:text-left">
+          <h4 class="text-base font-bold text-white font-heading">Ready to join the peer barter economy?</h4>
+          <p class="text-xs text-slate-300">Sign up in seconds, claim your 300 Karma bonus, and start exchanging skills.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="login.html#signup" class="btn-emerald px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/25 cursor-pointer">
+            <i class="fa-solid fa-sparkles"></i> Sign Up (+300 Karma)
+          </a>
+          <a href="#pyq-section" class="btn-glass px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-book-bookmark text-amber-400"></i> Explore PYQs
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MODAL 2: SCHEDULE MEETING MODAL (Accepted -> Scheduled)
+       ======================================================================== -->
+  <div id="schedule-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+    <div class="glass-modal w-full max-w-lg rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+      <button id="close-schedule-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold font-heading text-white">Schedule Meeting</h3>
+          <p class="text-xs text-slate-400">Lock session time and campus venue</p>
+        </div>
+      </div>
+
+      <div id="modal-swap-summary" class="glass-card p-3 mb-4 border-white/10 bg-slate-900/60 text-xs"></div>
+
+      <form id="schedule-form" class="space-y-3.5" novalidate>
+        <input type="hidden" id="schedule-swap-id">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Date</label>
+            <input type="date" id="schedule-date" required class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Time</label>
+            <input type="time" id="schedule-time" required class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Location / Venue</label>
+          <input type="text" id="schedule-location" required placeholder="e.g. Central Library Study Pod 2" class="w-full glass-input rounded-xl px-3 py-2 text-xs mb-2">
+          
+          <div class="flex flex-wrap gap-1.5 text-[11px]">
+            <span class="text-slate-400 self-center mr-1">Presets:</span>
+            <button type="button" class="preset-loc-btn px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10">Library 2nd Floor</button>
+            <button type="button" class="preset-loc-btn px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10">Campus Cafe</button>
+            <button type="button" class="preset-loc-btn px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10">Google Meet</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Prep Notes / Materials</label>
+          <textarea id="schedule-notes" rows="2" placeholder="e.g. Bring laptop with VS Code and pen." class="w-full glass-input rounded-xl px-3 py-2 text-xs"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button type="submit" id="submit-schedule-btn" class="btn-primary flex-1 py-2.5 rounded-xl text-xs font-bold">
+            Confirm Meeting Schedule
+          </button>
+          <button type="button" id="cancel-schedule-btn" class="btn-glass py-2.5 px-4 rounded-xl text-xs">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 3: PROPOSE BARTER MODAL (Creates New Swap -> Pending)
+       ======================================================================== -->
+  <div id="propose-swap-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+    <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+      <button id="close-propose-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-arrows-split-up-and-left"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold font-heading text-white">Propose Barter</h3>
+          <p class="text-xs text-slate-400">Offer your skills in exchange for theirs</p>
+        </div>
+      </div>
+
+      <form id="propose-swap-form" class="space-y-3.5" novalidate>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Select Peer</label>
+          <select id="propose-target-peer" required class="w-full glass-input rounded-xl px-3 py-2 text-xs cursor-pointer"></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-emerald-400 mb-1">Skill You Will Teach</label>
+          <input type="text" id="propose-teach-skill" required placeholder="e.g. Graph BFS Traversal" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-indigo-300 mb-1">Skill You Want from Peer</label>
+          <input type="text" id="propose-learn-skill" required placeholder="e.g. React State Lifecycle" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Pitch / Motivation Note</label>
+          <textarea id="propose-pitch" rows="2" placeholder="Brief note about the session goals." class="w-full glass-input rounded-xl px-3 py-2 text-xs"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button type="submit" id="submit-propose-btn" class="btn-primary flex-1 py-2.5 rounded-xl text-xs font-bold">
+            Send Swap Proposal
+          </button>
+          <button type="button" id="cancel-propose-btn" class="btn-glass py-2.5 px-4 rounded-xl text-xs">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 4: UPLOAD PYQ PAPER MODAL (+25 Karma Points)
+       ======================================================================== -->
+  <div id="upload-paper-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+    <div class="glass-modal w-full max-w-lg rounded-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+      <button id="close-upload-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold font-heading text-white">Upload Question Paper</h3>
+          <p class="text-xs text-emerald-400 font-semibold">+25 Karma Points awarded upon submission!</p>
+        </div>
+      </div>
+
+      <form id="upload-paper-form" class="space-y-3.5" novalidate>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Subject Name</label>
+            <input type="text" id="upload-subject" required placeholder="e.g. Operating Systems" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Course Code</label>
+            <input type="text" id="upload-code" required placeholder="e.g. CS-402" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Semester</label>
+            <select id="upload-semester" required class="w-full glass-input rounded-xl px-3 py-2 text-xs cursor-pointer">
+              <option value="Sem 1">Sem 1</option>
+              <option value="Sem 2">Sem 2</option>
+              <option value="Sem 3">Sem 3</option>
+              <option value="Sem 4" selected>Sem 4</option>
+              <option value="Sem 5">Sem 5</option>
+              <option value="Sem 6">Sem 6</option>
+              <option value="Sem 7">Sem 7</option>
+              <option value="Sem 8">Sem 8</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Exam Type</label>
+            <select id="upload-exam-type" required class="w-full glass-input rounded-xl px-3 py-2 text-xs cursor-pointer">
+              <option value="CIA-1">CIA-1</option>
+              <option value="CIA-2">CIA-2</option>
+              <option value="Semester End" selected>Semester End</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Exam Year</label>
+            <input type="number" id="upload-year" min="2018" max="2026" value="2024" required class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          </div>
+        </div>
+
+                <!-- Auto-Routed Google Drive Folder Indicator -->
+        <div class="flex items-center justify-between text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl font-mono">
+          <span class="flex items-center gap-1.5"><i class="fa-brands fa-google-drive text-sm"></i> Auto-Sorted Into Drive Folder:</span>
+          <span id="drive-folder-target-name" class="font-bold text-white bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-lg">Operating Systems</span>
+        </div>
+
+        <!-- File Picker & Active Drag-and-Drop Area -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span>Select PDF Document</span>
+            <span class="text-[10px] text-slate-400">Max size: 15 MB</span>
+          </label>
+
+          <!-- Hidden real file input -->
+          <input type="file" id="upload-file-input" accept=".pdf,application/pdf" class="hidden">
+
+          <!-- Interactive Dropzone -->
+          <div id="upload-dropzone" class="border-2 border-dashed border-white/20 rounded-2xl p-5 text-center transition-all bg-white/5 cursor-pointer hover:border-emerald-400/50 hover:bg-white/[0.07]">
+            
+            <!-- State 1: No file selected yet -->
+            <div id="upload-empty-state" class="space-y-2.5">
+              <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 mx-auto flex items-center justify-center text-2xl shadow-lg shadow-rose-500/10">
+                <i class="fa-regular fa-file-pdf"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-200 font-medium">Drag & drop your question paper PDF here</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">or choose directly from your device</p>
+              </div>
+              <div>
+                <button type="button" id="browse-pdf-btn" class="btn-emerald text-xs px-4 py-2 rounded-xl font-bold inline-flex items-center gap-2 shadow-lg shadow-emerald-500/25">
+                  <i class="fa-solid fa-folder-open text-xs"></i> Browse Computer / Device
+                </button>
+              </div>
+              <p class="text-[10px] text-slate-400">Files are automatically sorted into your Google Drive folder by subject</p>
+            </div>
+
+            <!-- State 2: File is selected -->
+            <div id="upload-selected-state" class="hidden flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-emerald-500/40 text-left">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
+                  <i class="fa-solid fa-file-circle-check"></i>
+                </div>
+                <div class="min-w-0">
+                  <p id="selected-file-name" class="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-[270px]">filename.pdf</p>
+                  <p class="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5">
+                    <span id="selected-file-size" class="font-medium text-slate-300">2.4 MB</span>
+                    <span>&bull;</span>
+                    <span class="text-emerald-400 font-mono flex items-center gap-1">
+                      <i class="fa-brands fa-google-drive text-[10px]"></i>
+                      <span>Drive: /<span id="selected-target-folder" class="font-semibold underline">Operating Systems</span>/</span>
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <button type="button" id="remove-selected-file-btn" class="text-rose-400 hover:text-rose-300 p-2 rounded-lg hover:bg-rose-500/10 transition-colors text-xs font-semibold flex items-center gap-1 shrink-0" title="Remove or change file">
+                <i class="fa-solid fa-trash-can text-sm"></i>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Optional Collapsible Google Drive Link (Option 2) -->
+        <div class="pt-1">
+          <details class="group rounded-xl border border-white/10 bg-white/[0.02] p-2.5 transition-all text-xs">
+            <summary class="cursor-pointer font-semibold text-slate-300 hover:text-white flex items-center justify-between list-none">
+              <span class="flex items-center gap-1.5 text-[11px]">
+                <i class="fa-brands fa-google-drive text-emerald-400"></i>
+                <span>Already have a Google Drive link? (Optional manual paste)</span>
+              </span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="mt-2.5 pt-2 border-t border-white/10 space-y-1.5">
+              <input type="url" id="upload-drive-url" placeholder="https://drive.google.com/file/d/... (Optional if file is selected above)" class="w-full glass-input rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500">
+              <div class="flex items-center justify-between text-[10px] text-slate-400">
+                <span>If no file is attached above, this Drive URL will be used.</span>
+                <a href="https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1">
+                  <span>Open Master Folder</span> <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                </a>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button type="submit" id="submit-upload-btn" class="btn-emerald flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-sparkles"></i> Publish Paper & Claim +25⚡
+          </button>
+          <button type="button" id="cancel-upload-btn" class="btn-glass py-2.5 px-4 rounded-xl text-xs">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 5: PAPER PREVIEW MODAL
+       ======================================================================== -->
+  <div id="paper-preview-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+    <div class="glass-modal w-full max-w-2xl rounded-2xl p-6 relative max-h-[92vh] overflow-y-auto">
+      <button id="close-preview-modal-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="mb-4">
+        <span class="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          Official Academic Archive
+        </span>
+        <h3 id="preview-modal-title" class="text-xl font-bold font-heading text-white mt-1.5">Subject Paper</h3>
+        <p id="preview-modal-subtitle" class="text-xs text-slate-400">Code • Semester • Exam Type</p>
+      </div>
+
+      <!-- Preview Mock Document Sheet -->
+      <div class="glass-card p-6 border-white/10 bg-slate-900/80 mb-5 font-mono text-xs space-y-4 text-slate-300">
+        <div class="text-center border-b border-white/10 pb-3">
+          <p class="font-bold text-white uppercase text-sm">Autonomous Engineering College</p>
+          <p class="text-[11px] text-slate-400">Department of Computer Science & Information Technology</p>
+          <p class="text-[11px] text-indigo-300 mt-1">Total Marks: 100 • Duration: 3 Hours</p>
+        </div>
+
+        <div>
+          <p class="font-bold text-white text-xs mb-1">PART A (Answer all questions - 20 Marks)</p>
+          <ol class="list-decimal pl-4 space-y-1.5 text-[11px] text-slate-300">
+            <li>Define the asymptotic worst-case and average-case time complexity with an example.</li>
+            <li>Explain the essential properties required to maintain a balanced Search Tree.</li>
+            <li>Distinguish between preemptive and non-preemptive CPU scheduling algorithms.</li>
+          </ol>
+        </div>
+
+        <div>
+          <p class="font-bold text-white text-xs mb-1">PART B (Answer any 4 questions - 80 Marks)</p>
+          <ol class="list-decimal pl-4 space-y-1.5 text-[11px] text-slate-300" start="4">
+            <li>Design and analyze an optimal algorithm for Minimum Spanning Tree using Prim's logic.</li>
+            <li>Explain database normalization from First Normal Form (1NF) through Boyce-Codd (BCNF).</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-xs text-emerald-400 font-medium flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved"></i> Verified Faculty Syllabus Match
+        </span>
+        <button id="preview-download-btn" class="btn-primary text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-2">
+          <i class="fa-solid fa-download"></i> Download Full PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 6: EDIT PROFILE & SKILLS MODAL (Full Name, Skills Teach, Skills Learn, Dept, Sem)
+       Email is strictly read-only/disabled per security & architecture rules
+       ======================================================================== -->
+  <div id="edit-profile-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+    <div class="glass-modal w-full max-w-lg rounded-2xl p-6 relative max-h-[92vh] overflow-y-auto">
+      <button id="close-edit-profile-modal-btn" onclick="closeEditProfileModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center text-lg shadow-lg shadow-indigo-500/25">
+          <i class="fa-solid fa-user-pen"></i>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold font-heading text-white">Edit Profile & Skills</h3>
+          <p class="text-xs text-slate-400">Update your student information, skills you teach, and skills you seek</p>
+        </div>
+      </div>
+
+            <!-- Avatar & Account Summary Banner with Custom Photo Upload -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-white/[0.07] to-white/[0.03] border border-white/10 mb-4 shadow-lg">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+          <!-- Interactive Avatar with Hover Camera Glow -->
+          <div class="relative group cursor-pointer" id="edit-profile-avatar-trigger" title="Click to upload custom photo">
+            <img id="edit-profile-avatar-preview" src="assets/images/avatar-default.jpg" class="w-20 h-20 rounded-2xl object-cover border-2 border-indigo-500/50 shadow-lg group-hover:border-indigo-400 transition-all duration-300 group-hover:scale-105">
+            <div class="absolute inset-0 bg-black/45 rounded-2xl opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-all duration-200 text-white backdrop-blur-[2px]">
+              <i class="fa-solid fa-camera text-base mb-1"></i>
+              <span class="text-[9px] font-semibold uppercase tracking-wider">Change</span>
+            </div>
+            <span class="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] text-white shadow-md">
+              <i class="fa-solid fa-camera"></i>
+            </span>
+          </div>
+
+          <!-- Student Info & Action Buttons -->
+          <div class="flex-1 min-w-0 text-center sm:text-left w-full">
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+              <p id="edit-profile-header-name" class="text-base font-bold text-white truncate">Student Name</p>
+              <span id="edit-profile-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Verified Student</span>
+            </div>
+            <p id="edit-profile-header-email" class="text-xs text-slate-400 truncate font-mono mb-2">student@college.edu</p>
+
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <input type="file" id="edit-profile-avatar-input" accept="image/png,image/jpeg,image/jpg,image/webp" class="hidden">
+              <button type="button" id="edit-profile-upload-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+                <i class="fa-solid fa-cloud-arrow-up text-[11px] text-indigo-400"></i>
+                <span>Upload Custom Photo</span>
+              </button>
+              <button type="button" id="edit-profile-reset-avatar-btn" class="px-2.5 py-1.5 rounded-xl text-xs text-slate-400 hover:text-rose-300 hover:bg-rose-500/15 border border-white/10 flex items-center gap-1.5 transition-all active:scale-95" title="Revert to default avatar">
+                <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                <span>Reset Avatar</span>
+              </button>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-2 flex items-center justify-center sm:justify-start gap-1">
+              <i class="fa-solid fa-circle-info text-indigo-400 text-[9px]"></i> Supports JPG, PNG, WebP Â· Auto-optimized under 50KB
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <form id="edit-profile-form" class="space-y-4" novalidate>
+        <!-- 1. FULL NAME / DISPLAY NAME -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span><i class="fa-solid fa-user text-indigo-400 mr-1.5"></i> Full Name / Display Name</span>
+            <span class="text-[10px] text-slate-400">Publicly visible</span>
+          </label>
+          <input type="text" id="edit-profile-name" required placeholder="e.g. Aryanraj Jaiswal" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500">
+        </div>
+
+        <!-- 2. EMAIL ADDRESS (STRICTLY READ-ONLY / DISABLED) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span><i class="fa-solid fa-envelope text-indigo-400 mr-1.5"></i> College Email Address</span>
+            <span class="text-[10px] text-amber-400/90 font-medium flex items-center gap-1">
+              <i class="fa-solid fa-lock text-[9px]"></i> Non-editable Primary ID
+            </span>
+          </label>
+          <div class="relative">
+            <input type="email" id="edit-profile-email" disabled readonly class="w-full rounded-xl px-3.5 py-2.5 text-xs text-slate-400 bg-white/[0.04] border border-white/10 cursor-not-allowed select-none font-mono">
+            <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-slate-500">
+              <i class="fa-solid fa-lock text-xs"></i>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-1">Your registered academic email is locked for security & authentication integrity.</p>
+        </div>
+
+        <!-- 3. DEPARTMENT & SEMESTER -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">
+              <i class="fa-solid fa-building-columns text-indigo-400 mr-1.5"></i> Department
+            </label>
+            <input type="text" id="edit-profile-department" required placeholder="e.g. Computer Science, BSCIT" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">
+              <i class="fa-solid fa-calendar-week text-indigo-400 mr-1.5"></i> Current Semester
+            </label>
+            <select id="edit-profile-semester" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white">
+              <option value="Semester 1">Semester 1</option>
+              <option value="Semester 2">Semester 2</option>
+              <option value="Semester 3">Semester 3</option>
+              <option value="Semester 4">Semester 4</option>
+              <option value="Semester 5">Semester 5</option>
+              <option value="Semester 6">Semester 6</option>
+              <option value="Semester 7">Semester 7</option>
+              <option value="Semester 8">Semester 8</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. SKILLS YOU CAN TEACH (COMMA-SEPARATED) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-chalkboard-user mr-1.5"></i> Skills You Can Teach</span>
+            <span class="text-[10px] text-slate-400">Comma-separated</span>
+          </label>
+          <input type="text" id="edit-profile-teach" required placeholder="e.g. Python, C++, Prompt writing, DSA" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500">
+          <!-- Live Preview Tags for Teach Skills -->
+          <div id="edit-teach-tags-preview" class="flex flex-wrap gap-1.5 mt-2"></div>
+        </div>
+
+        <!-- 5. SKILLS YOU WANT TO LEARN (COMMA-SEPARATED) -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+            <span class="text-indigo-400 font-bold"><i class="fa-solid fa-graduation-cap mr-1.5"></i> Skills You Want to Learn</span>
+            <span class="text-[10px] text-slate-400">Comma-separated</span>
+          </label>
+          <input type="text" id="edit-profile-learn" required placeholder="e.g. Docker, Calculus III, Next.js, Cloud Computing" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500">
+          <!-- Live Preview Tags for Learn Skills -->
+          <div id="edit-learn-tags-preview" class="flex flex-wrap gap-1.5 mt-2"></div>
+        </div>
+
+        <!-- 6. SHORT BIO / FOCUS AREA -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">
+            <i class="fa-solid fa-comment-dots text-indigo-400 mr-1.5"></i> Peer Bio / Focus Area (Optional)
+          </label>
+          <textarea id="edit-profile-bio" rows="2" placeholder="e.g. Passionate BSCIT student building full-stack applications. Eager to swap programming for advanced mathematics." class="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 resize-none"></textarea>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="flex items-center gap-2.5 pt-2">
+          <button type="button" onclick="closeEditProfileModal()" class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
+            Cancel
+          </button>
+          <button type="submit" id="save-profile-btn" class="w-2/3 btn-emerald py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save Profile Changes</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer class="relative z-10 glass-nav mt-16 border-t border-white/10 pt-12 pb-8 px-4 sm:px-8 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+        <!-- Col 1: Brand & Status -->
+        <div class="space-y-3">
+          <a href="#home" class="flex items-center gap-2.5 text-white">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-emerald-500 flex items-center justify-center text-white shadow-md">
+              <i class="fa-solid fa-repeat text-sm"></i>
+            </div>
+            <span class="text-lg font-extrabold font-heading tracking-tight">Campus<span class="text-emerald-400">Barter</span></span>
+          </a>
+          <p class="text-slate-300 leading-relaxed text-xs">
+            A collaborative academic barter platform for college peers to trade skills, share past examination question banks, and build collective mastery.
+          </p>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[11px] font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Campus Network Status: Online & Active
+          </div>
+        </div>
+
+        <!-- Col 2: Navigation Links -->
+        <div class="space-y-2.5">
+          <p class="text-xs font-bold text-white uppercase tracking-wider font-heading">Navigation</p>
+          <ul class="space-y-1.5">
+            <li><a href="#home" class="hover:text-indigo-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-house text-[10px] text-indigo-400"></i> Home</a></li>
+            <li><a href="#about-section" class="hover:text-sky-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-circle-info text-[10px] text-sky-400"></i> About CampusBarter</a></li>
+            <li><a href="#pyq-section" class="hover:text-amber-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-file-lines text-[10px] text-amber-400"></i> PYQ Repository</a></li>
+            <li><a href="#swaps-section" class="hover:text-purple-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-timeline text-[10px] text-purple-400"></i> Swap State Tracker</a></li>
+            <li><a href="#profiles-section" class="hover:text-emerald-300 transition-colors flex items-center gap-1.5"><i class="fa-solid fa-users text-[10px] text-emerald-400"></i> Peer Directory</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Academic Vault -->
+        <div class="space-y-2.5">
+          <p class="text-xs font-bold text-white uppercase tracking-wider font-heading">Academic Vault</p>
+          <ul class="space-y-1.5">
+            <li><a href="#pyq-section" class="hover:text-slate-200 transition-colors">Data Structures & Algorithms (CS-301)</a></li>
+            <li><a href="#pyq-section" class="hover:text-slate-200 transition-colors">Operating Systems (CS-402)</a></li>
+            <li><a href="#pyq-section" class="hover:text-slate-200 transition-colors">Database Management Systems (CS-403)</a></li>
+            <li><a href="#pyq-section" class="hover:text-slate-200 transition-colors">Computer Networks (CS-501)</a></li>
+            <li><a href="#pyq-section" class="hover:text-slate-200 transition-colors">Discrete Mathematics (MA-301)</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Community & Rules -->
+        <div class="space-y-2.5">
+          <p class="text-xs font-bold text-white uppercase tracking-wider font-heading">Karma Economy Rules</p>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1.5 text-[11px]">
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Sign Up Welcome Bonus:</span>
+              <span class="text-amber-400 font-bold">300⚡</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Karma Refill Rate:</span>
+              <span class="text-sky-400 font-bold">+30⚡/hr (Max 120⚡)</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Upload PYQ Paper:</span>
+              <span class="text-emerald-400 font-bold">+25⚡</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Download PYQ Paper:</span>
+              <span class="text-rose-400 font-bold">-15⚡</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300">
+              <span>Completed Barter:</span>
+              <span class="text-indigo-400 font-bold">+50⚡ each</span>
+            </div>
+          </div>
+          <a href="login.html#signup" class="w-full btn-glass text-xs py-2 rounded-xl text-center hover:text-white flex items-center justify-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-user-plus text-emerald-400"></i> Join as Peer
+            </a>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-[11px] text-slate-400">
+          © 2025 CampusBarter. Built with HTML, Tailwind CSS & Vanilla JavaScript. Open student exchange.
+        </p>
+
+        <!-- Back to Top Button -->
+        <a href="#home" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/15 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-medium">
+          <i class="fa-solid fa-arrow-up text-indigo-400"></i> Back to Top
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       MODAL: KARMA TOKEN REFILL DETAILS & ENGINE MODAL (MAX 120⚡ CAP)
+       ======================================================================== -->
+  <div id="token-refill-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+    <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative max-h-[92vh] overflow-y-auto border border-indigo-500/30 shadow-2xl">
+      <button onclick="closeTokenRefillModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-bolt-lightning text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-extrabold text-white font-heading">Karma Token Refill Engine</h3>
+          <p class="text-xs text-slate-400">Automated Replenishment (Max Limit: 120⚡)</p>
+        </div>
+      </div>
+
+      <!-- Live Refill / Cap Status Card -->
+      <div class="glass-card p-4 rounded-xl border-indigo-500/30 bg-indigo-950/30 mb-4 text-center">
+        <p class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Karma Refill Status</p>
+        <div id="modal-refill-countdown" class="text-3xl font-black font-mono text-emerald-400 my-1">
+          120⚡ CAP REACHED
+        </div>
+        <div id="modal-refill-status" class="flex items-center justify-center gap-2 text-xs font-semibold text-emerald-400 mt-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Refill Paused • Balance is at or above 120⚡ cap</span>
+        </div>
+        <!-- Progress bar for 2-hour window -->
+        <div class="w-full bg-white/10 rounded-full h-2 mt-3 overflow-hidden border border-white/10">
+          <div id="modal-refill-progress" class="bg-emerald-400 h-full w-full transition-all duration-500"></div>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+          Refill automatically stops once your balance hits <b>120⚡</b>. It resumes if your balance drops below 120⚡ (e.g. downloading question papers).
+        </p>
+      </div>
+
+      <!-- Economy Specs Table -->
+      <div class="space-y-2 mb-4 text-xs">
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+          <span class="text-slate-300 flex items-center gap-2"><i class="fa-solid fa-gauge-high text-sky-400"></i> Generation Rate</span>
+          <span class="font-bold text-white font-mono">30 Karma / hour</span>
+        </div>
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+          <span class="text-slate-300 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-purple-400"></i> Refill Interval</span>
+          <span class="font-bold text-white font-mono">Every 2 Hours (+60⚡)</span>
+        </div>
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+          <span class="text-slate-300 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-400"></i> Maximum Refill Cap</span>
+          <span class="font-bold text-emerald-300 font-mono">120⚡ (Stops upon reaching)</span>
+        </div>
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+          <span class="text-slate-300 flex items-center gap-2"><i class="fa-solid fa-gift text-amber-400"></i> Starting Welcome Gift</span>
+          <span class="font-bold text-amber-300 font-mono">300⚡ (One-time bonus)</span>
+        </div>
+      </div>
+
+      <!-- Close Modal Button -->
+      <button onclick="closeTokenRefillModal()" class="w-full btn-glass text-xs py-2.5 rounded-xl font-medium text-slate-300 hover:text-white transition-colors">
+        Close Window
+      </button>
+    </div>
+  </div>
+
+  <!-- Supabase JS Client & Dual-Mode Adapter -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+
+  <!-- CampusBarter Core App Logic -->
+  <script src="script.js"></script>
+  <!-- Preloader Fail-Safe Watchdog (Guarantees Page Reveal Never Gets Stuck) -->
+  <script>
+    setTimeout(function() {
+      var p = document.getElementById("app-preloader");
+      if (p && !p.classList.contains("fade-out")) {
+        p.classList.add("fade-out");
+        document.body.classList.add("page-revealed");
+        setTimeout(function() { p.style.display = "none"; }, 600);
+      }
+    }, 2500);
+  </script>
+</body>
+</html>
