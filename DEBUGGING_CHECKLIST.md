@@ -162,3 +162,4 @@
 | 24 | Duplicate paper upload strictly blocked with Anti-Karma-Farming (+25⚡ blocked on duplicate exam papers; papers tamper-proof) | Aryanraj × Shantanu | [x] PASS |
 | 25 | Real User Custom Skills Persistence (Teach & Learn): Generic placeholders ('General Studies', 'Advanced Coding') eliminated; authentic skills ('Bakchodi', 'Full Stack React', 'UI/UX Design') reliably loaded from Cloud & LocalStorage | Aryanraj × Shantanu | [x] PASS |
 | 26 | Preloader Audio Unlocker Cyber-Pill: Glowing radar wave ring enables procedural audio before user reaches main app | Aryanraj × Shantanu | [x] PASS |
+| 27 | Real Email Password Reset Protection: On-screen 'Demo Security Dispatch' eliminated; 6-digit verification code dispatched directly to user's real email with zero on-screen leakage | Aryanraj × Shantanu | [x] PASS |

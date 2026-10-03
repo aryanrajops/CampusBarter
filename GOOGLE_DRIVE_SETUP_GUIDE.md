@@ -38,6 +38,28 @@ graph TD
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+
+    // 0. Handle Password Reset OTP Email Dispatch
+    if (data.action === "send_password_reset_otp") {
+      var recipient = String(data.email || "").trim();
+      var otpCode = String(data.otp || "").trim();
+      if (recipient && otpCode) {
+        MailApp.sendEmail({
+          to: recipient,
+          subject: "CampusBarter - Your 6-Digit Password Reset Code",
+          htmlBody: "<div style='font-family:sans-serif; max-width:480px; padding:24px; background:#0f172a; color:#f8fafc; border-radius:16px; border:1px solid rgba(255,255,255,0.1);'>" +
+            "<h2 style='color:#818cf8; margin-top:0;'>CampusBarter Security</h2>" +
+            "<p style='font-size:14px; color:#cbd5e1;'>You requested a password reset for your CampusBarter collegiate account. Use the 6-digit verification code below:</p>" +
+            "<div style='font-size:36px; font-weight:900; letter-spacing:8px; color:#34d399; margin:24px 0; font-family:monospace;'>" + otpCode + "</div>" +
+            "<p style='font-size:12px; color:#94a3b8;'>This code expires in 5 minutes. If you did not request this, you can safely ignore this email.</p>" +
+            "<hr style='border:none; border-top:1px solid rgba(255,255,255,0.1); margin:20px 0;'>" +
+            "<p style='font-size:11px; color:#64748b;'>CampusBarter &bull; Collaborative Student Knowledge & Resource Vault</p>" +
+          "</div>"
+        });
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "success", message: "OTP email dispatched" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var fileName = data.fileName || "Question_Paper.pdf";
     var fileData = data.fileData; // Base64 data URI
     var subject = String(data.subject || "General Studies").trim();
