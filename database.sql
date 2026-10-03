@@ -201,7 +201,40 @@ SECURITY DEFINER
 SET search_path = public
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_teach text[];
+    v_learn text[];
 BEGIN
+    -- Extract teach_skills from user metadata if provided
+    IF NEW.raw_user_meta_data ? 'teach_skills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_teach
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'teach_skills') AS elem;
+    ELSIF NEW.raw_user_meta_data ? 'teachSkills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_teach
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'teachSkills') AS elem;
+    END IF;
+
+    IF v_teach IS NULL OR array_length(v_teach, 1) = 0 THEN
+        v_teach := ARRAY['Full Stack Web Dev', 'Python & DSA'];
+    END IF;
+
+    -- Extract learn_skills from user metadata if provided
+    IF NEW.raw_user_meta_data ? 'learn_skills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_learn
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'learn_skills') AS elem;
+    ELSIF NEW.raw_user_meta_data ? 'learnSkills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_learn
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'learnSkills') AS elem;
+    END IF;
+
+    IF v_learn IS NULL OR array_length(v_learn, 1) = 0 THEN
+        v_learn := ARRAY['System Architecture', 'Database Management'];
+    END IF;
+
     -- Insert profile with 300 Karma
     INSERT INTO public.profiles (id, name, email, department, semester, karma, avatar_url, teach_skills, learn_skills)
     VALUES (
@@ -212,8 +245,8 @@ BEGIN
         COALESCE(NEW.raw_user_meta_data->>'semester', 'Sem 4'),
         300,
         COALESCE(NEW.raw_user_meta_data->>'avatar_url', 'assets/images/avatar-default.jpg'),
-        ARRAY['General Studies'],
-        ARRAY['Advanced Coding']
+        v_teach,
+        v_learn
     );
 
     -- Record transaction in the audit ledger
@@ -466,6 +499,97 @@ BEGIN
         'new_balance', v_new_karma,
         'message', 'Karma refilled by +' || v_refill_amount || '⚡! Current balance: ' || v_new_karma || '⚡'
     );
+END;
+$$;
+
+-- -----------------------------------------------------------------------------
+-- 9. LIVE MIGRATION SCRIPT FOR SUPABASE SQL EDITOR
+-- Run this block once in your Supabase Dashboard SQL Editor to:
+--  1) Permanently upgrade legacy student profiles with their real skills
+--  2) Upgrade handle_new_user() trigger so all future signups receive their entered skills
+-- -----------------------------------------------------------------------------
+
+-- Step A: Upgrade legacy student profiles in public.profiles
+UPDATE public.profiles
+SET teach_skills = ARRAY['Bakchodi'],
+    learn_skills = ARRAY['Full Stack React', 'Docker & Containers']
+WHERE email ILIKE '%dsilvashaun%';
+
+UPDATE public.profiles
+SET teach_skills = ARRAY['Full Stack Web Dev', 'Python & DSA'],
+    learn_skills = ARRAY['UI/UX Design', 'System Architecture']
+WHERE email ILIKE '%aryanj%' OR email ILIKE '%aryanraj%';
+
+UPDATE public.profiles
+SET teach_skills = ARRAY['Java Programming', 'C++'],
+    learn_skills = ARRAY['Web Development', 'Database Indexing']
+WHERE email ILIKE '%theycallmestyler%';
+
+-- Step B: Re-deploy the handle_new_user trigger with conflict resolution
+CREATE OR REPLACE FUNCTION public.handle_new_user() 
+RETURNS TRIGGER 
+SECURITY DEFINER
+SET search_path = public
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_teach text[];
+    v_learn text[];
+BEGIN
+    -- Extract teach_skills from user metadata
+    IF NEW.raw_user_meta_data ? 'teach_skills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_teach
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'teach_skills') AS elem;
+    ELSIF NEW.raw_user_meta_data ? 'teachSkills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_teach
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'teachSkills') AS elem;
+    END IF;
+
+    IF v_teach IS NULL OR array_length(v_teach, 1) = 0 THEN
+        v_teach := ARRAY['Full Stack Web Dev', 'Python & DSA'];
+    END IF;
+
+    -- Extract learn_skills from user metadata
+    IF NEW.raw_user_meta_data ? 'learn_skills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_learn
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'learn_skills') AS elem;
+    ELSIF NEW.raw_user_meta_data ? 'learnSkills' THEN
+        SELECT array_agg(elem::text)
+        INTO v_learn
+        FROM jsonb_array_elements_text(NEW.raw_user_meta_data->'learnSkills') AS elem;
+    END IF;
+
+    IF v_learn IS NULL OR array_length(v_learn, 1) = 0 THEN
+        v_learn := ARRAY['System Architecture', 'Database Management'];
+    END IF;
+
+    -- Insert profile with 300 Karma welcome bonus
+    INSERT INTO public.profiles (id, name, email, department, semester, karma, avatar_url, teach_skills, learn_skills)
+    VALUES (
+        NEW.id,
+        COALESCE(NEW.raw_user_meta_data->>'name', 'New Scholar'),
+        NEW.email,
+        COALESCE(NEW.raw_user_meta_data->>'department', 'Computer Science'),
+        COALESCE(NEW.raw_user_meta_data->>'semester', 'Sem 1'),
+        300,
+        COALESCE(NEW.raw_user_meta_data->>'avatar_url', 'assets/images/avatar-default.jpg'),
+        v_teach,
+        v_learn
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET teach_skills = EXCLUDED.teach_skills,
+        learn_skills = EXCLUDED.learn_skills,
+        updated_at = NOW();
+
+    -- Record transaction in the audit ledger
+    INSERT INTO public.karma_ledger (user_id, amount, action_type, reference_id, description)
+    VALUES (NEW.id, 300, 'SIGNUP_BONUS', NEW.id::text, 'Initial registration welcome bonus')
+    ON CONFLICT DO NOTHING;
+
+    RETURN NEW;
 END;
 $$;
 

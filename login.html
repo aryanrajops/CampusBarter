@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login & Sign Up | CampusBarter - Student Exchange & PYQ Vault</title>
-  <meta name="description" content="Sign in or register for CampusBarter. Claim 300 Karma points instantly, trade programming for calculus, and access past question papers.">
+  <title>Login &amp; Sign Up | CampusBarter - Student Exchange &amp; PYQ Vault</title>
+  <meta name="author" content="Aryanraj &amp; Shantanu">
+  <meta name="description" content="Sign in or register for CampusBarter. Claim 300 Karma points instantly, trade programming for calculus, and access past question papers. Created by Aryanraj &amp; Shantanu.">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -358,8 +359,13 @@
   </main>
 
   <!-- Footer -->
-  <footer class="relative z-20 py-4 text-center text-xs text-slate-500 border-t border-white/5">
-    © 2025 CampusBarter. Open Collegiate Knowledge & Past Question Paper Exchange.
+  <footer class="relative z-20 py-4 text-center text-xs text-slate-500 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-2 px-4">
+    <span>© 2026 CampusBarter. Open Collegiate Knowledge &amp; Past Question Paper Exchange.</span>
+    <span class="hidden sm:inline text-slate-700">•</span>
+    <span class="text-slate-400 flex items-center gap-1.5">
+      <span>Made by</span>
+      <span class="px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-bold">Aryanraj × Shantanu</span>
+    </span>
   </footer>
 
   <!-- Supabase JS Client & Dual-Mode Adapter -->
@@ -534,6 +540,13 @@
         SEED_DEMO_ACCOUNTS.forEach(demo => {
           if (!list.some(a => a.email.toLowerCase() === demo.email.toLowerCase())) {
             list.push(demo);
+            changed = true;
+          }
+        });
+        list.forEach(a => {
+          if ((a.id === "usr-1" || a.id === "usr-2" || a.id === "usr-3") && !a.name.startsWith("AI ")) {
+            a.name = "AI " + a.name.replace(/^AI\s*/, "");
+            a.isAi = true;
             changed = true;
           }
         });
@@ -899,12 +912,21 @@
       setButtonLoading(signupBtn, true, "Allocating 300⚡ Karma...");
 
       try {
+        const resolvedFallback = (typeof resolveCollegiateSkills === "function") 
+          ? resolveCollegiateSkills({ name, email, department, teachSkills, learnSkills })
+          : { teach: ["Data Structures & Algorithms", "Python Programming"], learn: ["System Architecture", "Cloud Computing"] };
+
+        const finalTeach = teachSkills.length > 0 ? teachSkills : resolvedFallback.teach;
+        const finalLearn = learnSkills.length > 0 ? learnSkills : resolvedFallback.learn;
+
         const metadata = {
           name: name,
           department: department,
           semester: semester,
-          teachSkills: teachSkills.length > 0 ? teachSkills : ["General Studies"],
-          learnSkills: learnSkills.length > 0 ? learnSkills : ["Programming"],
+          teachSkills: finalTeach,
+          learnSkills: finalLearn,
+          teach_skills: finalTeach,
+          learn_skills: finalLearn,
           avatar: "assets/images/avatar-default.jpg"
         };
 

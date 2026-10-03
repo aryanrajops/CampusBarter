@@ -108,7 +108,21 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
-.glass-input option { background-color: #0f172a; color: #f1f5f9; }
+.glass-input option { background-color: #0f172a; color: #f1f5f9; padding: 6px 8px; }
+.glass-input optgroup { background-color: #090e1a; color: #818cf8; font-weight: 700; font-size: 11px; padding: 6px 4px; }
+
+/* Interactive Skill Quick-Select Pills */
+.btn-peer-teach-skill {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-peer-teach-skill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+.btn-peer-teach-skill:active {
+  transform: scale(0.96);
+}
+
 
 /* Frosted Glass Modals */
 .glass-modal-backdrop {
@@ -1082,36 +1096,100 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   transform: translateY(1px) scale(0.975);
 }
 
-.preloader-audio-prompt {
-  margin-top: 1.1rem;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+/* ==========================================================================
+   Interactive Preloader Audio Badge / Prompt (Cyber-Pill Glassmorphic Button)
+   ========================================================================== */
+#preloader-audio-prompt,
+.preloader-audio-prompt,
+.preloader-audio-chip {
+  position: relative;
+  margin-top: 1.25rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(6, 78, 59, 0.3) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-top: 1px solid rgba(167, 243, 208, 0.65);
   color: #a7f3d0;
-  font-size: 0.72rem;
+  font-family: inherit;
+  font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: 0.03em;
-  padding: 0.45rem 1.1rem;
+  letter-spacing: 0.04em;
+  padding: 0.52rem 1.35rem;
   border-radius: 9999px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  justify-content: center;
+  gap: 0.65rem;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 0 22px rgba(16, 185, 129, 0.25), 0 6px 16px rgba(0, 0, 0, 0.35);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: preloaderPromptPulse 2.5s ease-in-out infinite;
+  animation: preloaderPromptPulse 3s ease-in-out infinite;
+  user-select: none;
+  outline: none;
 }
 
-.preloader-audio-prompt:hover {
-  background: rgba(16, 185, 129, 0.22);
-  border-color: #34d399;
+#preloader-audio-prompt:hover,
+.preloader-audio-prompt:hover,
+.preloader-audio-chip:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.42) 100%);
+  border-color: rgba(52, 211, 153, 0.8);
+  border-top-color: #ffffff;
   color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.35), 0 0 32px rgba(16, 185, 129, 0.5), 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+#preloader-audio-prompt:active,
+.preloader-audio-prompt:active,
+.preloader-audio-chip:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.preloader-audio-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #34d399;
+  font-size: 0.85rem;
+}
+
+#preloader-audio-prompt:hover .preloader-audio-icon-wrap,
+.preloader-audio-prompt:hover .preloader-audio-icon-wrap,
+.preloader-audio-chip:hover .preloader-audio-icon-wrap {
+  color: #ffffff;
+}
+
+.audio-pulse-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(52, 211, 153, 0.6);
+  animation: audioRingPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes audioRingPing {
+  0% { transform: scale(0.8); opacity: 0.9; }
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+.audio-dot {
+  color: rgba(52, 211, 153, 0.7);
+  margin: 0 0.25rem;
 }
 
 @keyframes preloaderPromptPulse {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.03); opacity: 1; }
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 0 18px rgba(16, 185, 129, 0.22), 0 6px 16px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    transform: scale(1.025);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25), 0 0 28px rgba(16, 185, 129, 0.38), 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
 }
 
 /* ==========================================================================

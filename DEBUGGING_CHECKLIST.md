@@ -136,16 +136,29 @@
 
 | Item # | Verification Check | Tester | Pass / Fail |
 | :---: | :--- | :---: | :---: |
-| 1 | < 15 Karma download blocked with error toast | | [ ] PASS |
-| 2 | Exactly 15 Karma download leaves 0 balance | | [ ] PASS |
-| 3 | Download button debouncing prevents spam | | [ ] PASS |
-| 4 | Barter completion awards exactly +50 Karma to both | | [ ] PASS |
-| 5 | Uploading paper awards +25 Karma | | [ ] PASS |
-| 6 | New registration grants +300 Karma welcome bonus & 30/hr (every 2h) Karma token refill (capped at 120⚡) | | [ ] PASS |
-| 7 | All 10 avatars and background load offline | | [ ] PASS |
-| 8 | Search and filter respond smoothly without errors | | [ ] PASS |
-| 9 | Mobile responsive layout works without horizontal scroll | | [ ] PASS |
-| 10 | Console has zero uncaught exceptions | | [ ] PASS |
-| 11 | Real User Starts at Absolute Zero (0 swaps, 0 uploads, 0 downloads, clean empty state) | | [ ] PASS |
-| 12 | All Dummy/Seed Data Differentiated with "AI " Prefix & "🤖 AI Bot" Pill Badges | | [ ] PASS |
-| 13 | Global hero stats dynamically calculate from actual dataset lengths | | [ ] PASS |
+| 1 | < 15 Karma download blocked with error toast | Aryanraj × Shantanu | [x] PASS |
+| 2 | Exactly 15 Karma download leaves 0 balance | Aryanraj × Shantanu | [x] PASS |
+| 3 | Download button debouncing prevents spam | Aryanraj × Shantanu | [x] PASS |
+| 4 | Barter completion awards exactly +50 Karma to both | Aryanraj × Shantanu | [x] PASS |
+| 5 | Uploading paper awards +25 Karma | Aryanraj × Shantanu | [x] PASS |
+| 6 | New registration grants +300 Karma welcome bonus & 30/hr (every 2h) Karma token refill (capped at 120⚡) | Aryanraj × Shantanu | [x] PASS |
+| 7 | All 10 avatars and background load offline | Aryanraj × Shantanu | [x] PASS |
+| 8 | Search and filter respond smoothly without errors | Aryanraj × Shantanu | [x] PASS |
+| 9 | Mobile responsive layout works without horizontal scroll | Aryanraj × Shantanu | [x] PASS |
+| 10 | Console has zero uncaught exceptions | Aryanraj × Shantanu | [x] PASS |
+| 11 | Real User Starts at Absolute Zero (0 swaps, 0 uploads, 0 downloads, clean empty state) | Aryanraj × Shantanu | [x] PASS |
+| 12 | All Dummy/Seed Data Differentiated with "AI " Prefix & "🤖 AI Bot" Pill Badges | Aryanraj × Shantanu | [x] PASS |
+| 13 | Global hero stats dynamically calculate from actual dataset lengths | Aryanraj × Shantanu | [x] PASS |
+| 14 | Dynamic Peer Live Search & Optgroup Dropdown (Registered Students vs AI Bots) | Aryanraj × Shantanu | [x] PASS |
+| 15 | Selected Peer Preview Card with Clickable Skill Quick-Fill Chips | Aryanraj × Shantanu | [x] PASS |
+| 16 | Self-Barter strictly blocked (User cannot propose exchange with self) | Aryanraj × Shantanu | [x] PASS |
+| 17 | Footer Year 2026 & Developer Credits ("Made by Aryanraj × Shantanu") | Aryanraj × Shantanu | [x] PASS |
+| 18 | Procedural Web Audio Sound Engine (Zero network latency, toggleable) | Aryanraj × Shantanu | [x] PASS |
+| 19 | Unauthenticated download prompts Login Modal & Redirection | Aryanraj × Shantanu | [x] PASS |
+| 20 | Mobile Navigation Drawer Toggle & Responsive Viewport | Aryanraj × Shantanu | [x] PASS |
+| 21 | Token Refill Countdown Modal & 120⚡ Cap Pausing | Aryanraj × Shantanu | [x] PASS |
+| 22 | Byte-for-Byte MD5 Parity Across All 3 Production & Backup Repositories | Aryanraj × Shantanu | [x] PASS |
+| 23 | Direct Google Drive folder bypass eliminated (Clean search-driven UI; enforces -15⚡ Karma per paper) | Aryanraj × Shantanu | [x] PASS |
+| 24 | Duplicate paper upload strictly blocked with Anti-Karma-Farming (+25⚡ blocked on duplicate exam papers; papers tamper-proof) | Aryanraj × Shantanu | [x] PASS |
+| 25 | Real User Custom Skills Persistence (Teach & Learn): Generic placeholders ('General Studies', 'Advanced Coding') eliminated; authentic skills ('Bakchodi', 'Full Stack React', 'UI/UX Design') reliably loaded from Cloud & LocalStorage | Aryanraj × Shantanu | [x] PASS |
+| 26 | Preloader Audio Unlocker Cyber-Pill: Glowing radar wave ring enables procedural audio before user reaches main app | Aryanraj × Shantanu | [x] PASS |

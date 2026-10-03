@@ -55,6 +55,54 @@ window.isValidDriveUrl = isValidDriveUrl;
 
 const DEFAULT_ACCOUNTS = [
   {
+    id: "518f1dac-9518-4655-ab34-68faf0cae30d",
+    name: "Aryanraj Jaiswal",
+    isAi: false,
+    email: "aryanj.j.666@gmail.com",
+    password: "password123",
+    department: "BSCIT",
+    semester: "Sem 1",
+    karma: 300,
+    swapsCompleted: 0,
+    pyqsUploaded: 0,
+    downloads: 0,
+    avatar: "assets/images/avatar-default.jpg",
+    teachSkills: ["Full Stack Web Dev", "Python & DSA", "React 19"],
+    learnSkills: ["UI/UX Design", "System Architecture", "Cloud APIs"]
+  },
+  {
+    id: "c669f542-16f2-4fbe-8f36-b3b493ea5192",
+    name: "Shaun Dsilva",
+    isAi: false,
+    email: "dsilvashaun0809@gmail.com",
+    password: "password123",
+    department: "IT",
+    semester: "Sem 1",
+    karma: 300,
+    swapsCompleted: 0,
+    pyqsUploaded: 0,
+    downloads: 0,
+    avatar: "assets/images/avatar-default.jpg",
+    teachSkills: ["Bakchodi"],
+    learnSkills: ["Full Stack React", "Docker & Containers"]
+  },
+  {
+    id: "cb2c77b7-8cbe-425b-a0cd-98cf60be9db4",
+    name: "Lalitraj Jaiswal",
+    isAi: false,
+    email: "theycallmestyler@gmail.com",
+    password: "password123",
+    department: "Computer Science",
+    semester: "Sem 1",
+    karma: 300,
+    swapsCompleted: 0,
+    pyqsUploaded: 0,
+    downloads: 0,
+    avatar: "assets/images/avatar-default.jpg",
+    teachSkills: ["Java Programming", "Object Oriented Design", "C++"],
+    learnSkills: ["Web Development", "Database Indexing", "Spring Boot"]
+  },
+  {
     id: "usr-aryan",
     name: "Aryan Raj",
     isAi: false,
@@ -120,6 +168,104 @@ const DEFAULT_ACCOUNTS = [
   }
 ];
 
+/**
+ * Resolves collegiate curricular skills for students.
+ * STRICT PRINCIPLE: Always prioritize actual user/database skills first!
+ * If Shaun enters "Bakchodi", or any student enters custom skills, THAT is their skill.
+ * Academic fallbacks are only applied if skills are absent or literal "General Studies" placeholder.
+ */
+function resolveCollegiateSkills(p) {
+  if (typeof window.resolveCollegiateSkills === "function" && window.resolveCollegiateSkills !== resolveCollegiateSkills) {
+    return window.resolveCollegiateSkills(p);
+  }
+  if (!p) {
+    return {
+      teach: ["Full Stack Web Dev", "Python & DSA"],
+      learn: ["UI/UX Design", "System Architecture"]
+    };
+  }
+
+  // Parse skill values whether Array, comma-separated string, or Postgres array string "{item1,item2}"
+  const parseSkillsList = (val) => {
+    if (!val) return [];
+    if (Array.isArray(val)) {
+      return val.map(s => typeof s === "string" ? s.trim() : String(s)).filter(Boolean);
+    }
+    if (typeof val === "string") {
+      const trimmed = val.trim();
+      if (!trimmed) return [];
+      const stripped = trimmed.replace(/^\{|\}$/g, "");
+      return stripped
+        .split(",")
+        .map(s => s.trim().replace(/^["']|["']$/g, ""))
+        .filter(Boolean);
+    }
+    return [];
+  };
+
+  const rawTeach = parseSkillsList(p.teachSkills || p.teach_skills || (p.user_metadata && (p.user_metadata.teach_skills || p.user_metadata.teachSkills)));
+  const rawLearn = parseSkillsList(p.learnSkills || p.learn_skills || (p.user_metadata && (p.user_metadata.learn_skills || p.user_metadata.learnSkills)));
+
+  // Only filter out true generic placeholder / empty strings
+  const isGeneric = (s) => {
+    if (!s || typeof s !== "string") return true;
+    const lower = s.trim().toLowerCase();
+    return [
+      "general studies", 
+      "general", 
+      "advanced coding", 
+      "skill exchange", 
+      "peer academic barter", 
+      "n/a", 
+      "none", 
+      "null", 
+      "undefined"
+    ].includes(lower);
+  };
+
+  const cleanTeach = rawTeach.filter(s => !isGeneric(s));
+  const cleanLearn = rawLearn.filter(s => !isGeneric(s));
+
+  // Determine fallback defaults ONLY when clean skills are absent
+  const email = (p.email || "").toLowerCase();
+  const name = (p.name || "").toLowerCase();
+
+  let fallbackTeach = cleanTeach;
+  let fallbackLearn = cleanLearn;
+
+  if (cleanTeach.length === 0) {
+    if (email.includes("dsilvashaun") || name.includes("shaun")) {
+      fallbackTeach = ["Bakchodi"];
+    } else if (email.includes("aryanj") || email.includes("aryanraj") || name.includes("aryanraj")) {
+      fallbackTeach = ["Full Stack Web Dev", "Python & DSA"];
+    } else if (email.includes("theycallmestyler") || name.includes("lalitraj")) {
+      fallbackTeach = ["Java Programming", "C++"];
+    } else {
+      fallbackTeach = ["Peer Academic Barter"];
+    }
+  }
+
+  if (cleanLearn.length === 0) {
+    if (email.includes("dsilvashaun") || name.includes("shaun")) {
+      fallbackLearn = ["Full Stack React", "Docker & Containers"];
+    } else if (email.includes("aryanj") || email.includes("aryanraj") || name.includes("aryanraj")) {
+      fallbackLearn = ["UI/UX Design", "System Architecture"];
+    } else if (email.includes("theycallmestyler") || name.includes("lalitraj")) {
+      fallbackLearn = ["Web Development", "Database Indexing"];
+    } else {
+      fallbackLearn = ["Skill Exchange"];
+    }
+  }
+
+  // ABSOLUTELY NO DEPARTMENT/COURSE-BASED HARDCODING:
+  // Real user skills from database or inputs are 100% respected and preserved!
+  return {
+    teach: cleanTeach.length > 0 ? cleanTeach : fallbackTeach,
+    learn: cleanLearn.length > 0 ? cleanLearn : fallbackLearn
+  };
+}
+window.resolveCollegiateSkills = resolveCollegiateSkills;
+
 function getStoredAccounts() {
   const data = localStorage.getItem("cb_accounts");
   if (!data) {
@@ -129,14 +275,18 @@ function getStoredAccounts() {
   let accounts = JSON.parse(data);
   // Migration check: ensure mock AI accounts are properly prefixed and flagged
   let updated = false;
-  // Ensure Aryan Raj account is seeded in existing local cache
-  if (!accounts.some(a => a.email && a.email.toLowerCase() === 'aryanraj.20j@gmail.com')) {
-    const aryan = DEFAULT_ACCOUNTS.find(a => a.email === 'aryanraj.20j@gmail.com');
-    if (aryan) {
-      accounts.unshift(aryan);
-      updated = true;
+
+  // Ensure Aryan Raj and known real accounts are seeded in local cache
+  DEFAULT_ACCOUNTS.forEach(seedAcc => {
+    if (!seedAcc.isAi && seedAcc.email) {
+      const idx = accounts.findIndex(a => a.email && a.email.toLowerCase() === seedAcc.email.toLowerCase());
+      if (idx === -1) {
+        accounts.push(seedAcc);
+        updated = true;
+      }
     }
-  }
+  });
+
   accounts = accounts.map(acc => {
     if (acc.id === "usr-1" || acc.id === "usr-2" || acc.id === "usr-3") {
       acc.isAi = true;
@@ -147,6 +297,25 @@ function getStoredAccounts() {
     } else if (acc.isAi === undefined) {
       acc.isAi = false;
       updated = true;
+    }
+    // Sanitize any generic placeholder skills on real student accounts
+    if (!acc.isAi) {
+      const isGenericSkill = (s) => !s || typeof s !== "string" || [
+        "general studies", "general", "advanced coding", "skill exchange", "peer academic barter", "n/a", "none", "null", "undefined"
+      ].includes(s.trim().toLowerCase());
+      const hasGenericTeach = !acc.teachSkills || !acc.teachSkills.length || acc.teachSkills.some(isGenericSkill);
+      const hasGenericLearn = !acc.learnSkills || !acc.learnSkills.length || acc.learnSkills.some(isGenericSkill);
+      if (hasGenericTeach || hasGenericLearn) {
+        const resolved = resolveCollegiateSkills(acc);
+        if (hasGenericTeach) {
+          acc.teachSkills = resolved.teach;
+          updated = true;
+        }
+        if (hasGenericLearn) {
+          acc.learnSkills = resolved.learn;
+          updated = true;
+        }
+      }
     }
     if (acc.swapsCompleted === undefined) { acc.swapsCompleted = 0; updated = true; }
     if (acc.pyqsUploaded === undefined) { acc.pyqsUploaded = 0; updated = true; }
@@ -197,6 +366,24 @@ function getStoredCurrentUser() {
     if (parsed.swapsCompleted === undefined) { parsed.swapsCompleted = 0; updated = true; }
     if (parsed.pyqsUploaded === undefined) { parsed.pyqsUploaded = 0; updated = true; }
     if (parsed.downloads === undefined) { parsed.downloads = 0; updated = true; }
+    if (!parsed.isAi) {
+      const isGenericSkill = (s) => !s || typeof s !== "string" || [
+        "general studies", "general", "advanced coding", "skill exchange", "peer academic barter", "n/a", "none", "null", "undefined"
+      ].includes(s.trim().toLowerCase());
+      const hasGenericTeach = !parsed.teachSkills || !parsed.teachSkills.length || parsed.teachSkills.some(isGenericSkill);
+      const hasGenericLearn = !parsed.learnSkills || !parsed.learnSkills.length || parsed.learnSkills.some(isGenericSkill);
+      if (hasGenericTeach || hasGenericLearn) {
+        const resolved = resolveCollegiateSkills(parsed);
+        if (hasGenericTeach) {
+          parsed.teachSkills = resolved.teach;
+          updated = true;
+        }
+        if (hasGenericLearn) {
+          parsed.learnSkills = resolved.learn;
+          updated = true;
+        }
+      }
+    }
     if (updated) {
       localStorage.setItem("cb_current_user", JSON.stringify(parsed));
     }
@@ -235,6 +422,7 @@ const DEFAULT_PYQS = [
     isAi: true,
     uploaderAvatar: "assets/images/avatar-rohan.jpg",
     hasSolutions: true,
+    isProtected: true,
     fileUrl: "https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link"
   },
   {
@@ -252,6 +440,7 @@ const DEFAULT_PYQS = [
     isAi: true,
     uploaderAvatar: "assets/images/avatar-sneha.jpg",
     hasSolutions: true,
+    isProtected: true,
     fileUrl: "https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link"
   },
   {
@@ -269,6 +458,7 @@ const DEFAULT_PYQS = [
     isAi: true,
     uploaderAvatar: "assets/images/avatar-karan.jpg",
     hasSolutions: false,
+    isProtected: true,
     fileUrl: "https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link"
   },
   {
@@ -286,6 +476,7 @@ const DEFAULT_PYQS = [
     isAi: true,
     uploaderAvatar: "assets/images/avatar-ananya.jpg",
     hasSolutions: true,
+    isProtected: true,
     fileUrl: "https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link"
   },
   {
@@ -303,6 +494,7 @@ const DEFAULT_PYQS = [
     isAi: true,
     uploaderAvatar: "assets/images/avatar-devansh.jpg",
     hasSolutions: true,
+    isProtected: true,
     fileUrl: "https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link"
   },
   {
@@ -320,6 +512,7 @@ const DEFAULT_PYQS = [
     isAi: true,
     uploaderAvatar: "assets/images/avatar-meera.jpg",
     hasSolutions: false,
+    isProtected: true,
     fileUrl: "https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link"
   }
 ];
@@ -497,33 +690,156 @@ const DEFAULT_PEERS = [
 function getStoredPeers() {
   try {
     const accounts = getStoredAccounts();
-    const peers = [...DEFAULT_PEERS];
+    const realPeers = [];
+    const seenEmails = new Set();
+    const seenIds = new Set();
+
+    // Prioritize real student accounts first
     accounts.forEach(acc => {
-      if (!acc.isAi && !peers.some(p => p.id === acc.id || (p.email && acc.email && p.email.toLowerCase() === acc.email.toLowerCase()))) {
-        peers.push({
-          id: acc.id,
-          name: acc.name,
-          email: acc.email,
-          isAi: false,
-          avatar: acc.avatar || "assets/images/avatar-default.jpg",
-          department: acc.department || "Computer Science",
-          semester: acc.semester || "Sem 1",
-          rating: 5.0,
-          swapsCompleted: acc.swapsCompleted || 0,
-          karma: acc.karma || 300,
-          matchScore: 95,
-          bio: acc.bio || "Active collegiate student on CampusBarter ready to trade skills and knowledge.",
-          teachSkills: acc.teachSkills || ["General Studies"],
-          learnSkills: acc.learnSkills || ["Programming"]
-        });
+      if (!acc.isAi) {
+        const emailKey = (acc.email || "").toLowerCase();
+        if (!seenIds.has(acc.id) && (!emailKey || !seenEmails.has(emailKey))) {
+          seenIds.add(acc.id);
+          if (emailKey) seenEmails.add(emailKey);
+          const resolved = resolveCollegiateSkills(acc);
+          realPeers.push({
+            id: acc.id,
+            name: acc.name,
+            email: acc.email,
+            isAi: false,
+            avatar: acc.avatar || "assets/images/avatar-default.jpg",
+            department: acc.department || "Computer Science",
+            semester: acc.semester || "Sem 1",
+            rating: acc.rating || 5.0,
+            swapsCompleted: acc.swapsCompleted || 0,
+            karma: acc.karma || 300,
+            matchScore: 95,
+            bio: acc.bio || "Active collegiate student on CampusBarter ready to trade skills and knowledge.",
+            teachSkills: resolved.teach,
+            learnSkills: resolved.learn
+          });
+        }
       }
     });
+
+    const peers = [...realPeers];
+    DEFAULT_PEERS.forEach(dp => {
+      if (!seenIds.has(dp.id)) {
+        seenIds.add(dp.id);
+        peers.push(dp);
+      }
+    });
+
     return peers;
   } catch (e) {
     console.warn("[CampusBarter Storage] Error reading peers, falling back:", e);
     return [...DEFAULT_PEERS];
   }
 }
+
+// =============================================================================
+// DYNAMIC CLOUD PEER SYNCHRONIZATION (Supabase Cloud + LocalStorage)
+// Fetches all real registered students from cloud profiles and merges seamlessly
+// =============================================================================
+async function syncPeersFromCloud() {
+  if (typeof DataManager === "undefined" || !DataManager.isOnline() || typeof DataManager.getProfiles !== "function") {
+    return;
+  }
+  try {
+    const cloudProfiles = await DataManager.getProfiles();
+    if (!cloudProfiles || cloudProfiles.length === 0) return;
+
+    const accounts = getStoredAccounts();
+    let accountsUpdated = false;
+
+    cloudProfiles.forEach(cp => {
+      // Don't overwrite AI personas
+      if (cp.id === "usr-1" || cp.id === "usr-2" || cp.id === "usr-3") return;
+      const emailLower = (cp.email || "").toLowerCase();
+      const existingIdx = accounts.findIndex(a => a.id === cp.id || (a.email && emailLower && a.email.toLowerCase() === emailLower));
+      const resolved = resolveCollegiateSkills(cp);
+
+      if (existingIdx !== -1) {
+        // Prioritize real user skills:
+        const isGenericSkill = (s) => !s || typeof s !== "string" || [
+          "general studies", "general", "advanced coding", "skill exchange", "peer academic barter", "n/a", "none", "null", "undefined"
+        ].includes(s.trim().toLowerCase());
+
+        const localTeach = accounts[existingIdx].teachSkills;
+        const localLearn = accounts[existingIdx].learnSkills;
+        let finalTeach = resolved.teach;
+        let finalLearn = resolved.learn;
+
+        if (localTeach && localTeach.length && !localTeach.some(isGenericSkill)) {
+          if (!cp.teachSkills || !cp.teachSkills.length || cp.teachSkills.some(isGenericSkill)) {
+            finalTeach = localTeach;
+          }
+        }
+        if (localLearn && localLearn.length && !localLearn.some(isGenericSkill)) {
+          if (!cp.learnSkills || !cp.learnSkills.length || cp.learnSkills.some(isGenericSkill)) {
+            finalLearn = localLearn;
+          }
+        }
+
+        // Merge cloud updates into local account cache
+        accounts[existingIdx] = {
+          ...accounts[existingIdx],
+          name: cp.name || accounts[existingIdx].name,
+          department: cp.department || accounts[existingIdx].department,
+          semester: cp.semester || accounts[existingIdx].semester,
+          karma: typeof cp.karma === "number" ? cp.karma : accounts[existingIdx].karma,
+          teachSkills: finalTeach,
+          learnSkills: finalLearn,
+          avatar: cp.avatar || accounts[existingIdx].avatar,
+          isAi: false
+        };
+        accountsUpdated = true;
+      } else {
+        // Add new student discovered in cloud
+        accounts.push({
+          id: cp.id,
+          name: cp.name,
+          email: cp.email,
+          password: "",
+          department: cp.department || "Computer Science",
+          semester: cp.semester || "Sem 1",
+          karma: typeof cp.karma === "number" ? cp.karma : 300,
+          teachSkills: resolved.teach,
+          learnSkills: resolved.learn,
+          avatar: cp.avatar || "assets/images/avatar-default.jpg",
+          swapsCompleted: cp.swapsCompleted || 0,
+          pyqsUploaded: cp.pyqsUploaded || 0,
+          downloads: cp.downloads || 0,
+          isAi: false
+        });
+        accountsUpdated = true;
+      }
+    });
+
+    if (accountsUpdated) {
+      saveStoredAccounts(accounts);
+      STATE.accounts = accounts;
+    }
+
+    // Refresh STATE.peers
+    STATE.peers = getStoredPeers();
+
+    // Re-render UI components with freshly synced real peers
+    if (typeof renderPeerProfiles === "function") {
+      renderPeerProfiles(STATE.currentDeptFilter || "ALL");
+    }
+    if (typeof populatePeerDropdown === "function") {
+      const searchInput = document.getElementById("propose-peer-search-input");
+      populatePeerDropdown(searchInput ? searchInput.value : "");
+    }
+    if (typeof updateGlobalStats === "function") {
+      updateGlobalStats();
+    }
+  } catch (err) {
+    console.warn("[CampusBarter Backend] Cloud peer sync warning:", err);
+  }
+}
+
 
 const STATE = {
   currentUser: getStoredCurrentUser(),
@@ -535,16 +851,29 @@ const STATE = {
   peers: getStoredPeers()
 };
 
+// Expose state and storage engines to global window
+window.STATE = STATE;
+window.getStoredAccounts = getStoredAccounts;
+window.saveStoredAccounts = saveStoredAccounts;
+window.getStoredCurrentUser = getStoredCurrentUser;
+window.setStoredCurrentUser = setStoredCurrentUser;
+window.getStoredPYQs = getStoredPYQs;
+window.saveStoredPYQs = saveStoredPYQs;
+window.getStoredSwaps = getStoredSwaps;
+window.saveStoredSwaps = saveStoredSwaps;
+window.getStoredPeers = getStoredPeers;
+window.syncPeersFromCloud = syncPeersFromCloud;
+
 // =============================================================================
 // AI MOCK IDENTIFIER & REAL USER STATS ENGINE
 // =============================================================================
 
 function renderAiBadge(isAi, showReal = false) {
   if (isAi) {
-    return `<span class="badge-ai-bot shrink-0 whitespace-nowrap" title="System-generated AI Mock Data"><i class="fa-solid fa-robot"></i><span>AI Bot</span></span>`;
+    return `<span class="badge-ai-bot shrink-0 whitespace-nowrap" title="Automated Demo Account"><i class="fa-solid fa-robot"></i><span>AI Bot</span></span>`;
   }
   if (showReal) {
-    return `<span class="badge-real-user shrink-0 whitespace-nowrap" title="Verified Real Student Account"><i class="fa-solid fa-circle-check"></i><span>Real User</span></span>`;
+    return `<span class="badge-real-user shrink-0 whitespace-nowrap" title="Verified Human Student"><i class="fa-solid fa-circle-check"></i><span>Real User</span></span>`;
   }
   return "";
 }
@@ -893,7 +1222,7 @@ function openEditProfileModal() {
   if (badge) {
     badge.innerHTML = user.isAi 
       ? '<i class="fa-solid fa-robot mr-1"></i> AI Persona' 
-      : '<i class="fa-solid fa-circle-check mr-1"></i> Verified Student';
+      : '<i class="fa-solid fa-circle-check mr-1"></i> Real Student';
   }
 
   // Pre-fill input fields
@@ -930,6 +1259,24 @@ function openEditProfileModal() {
   if (bioInput) bioInput.value = user.bio || "";
 
   clearFieldErrors(document.getElementById("edit-profile-form"));
+
+  // Reset password collapsible container
+  const passContainer = document.getElementById("change-password-container");
+  if (passContainer) {
+    passContainer.classList.add("hidden");
+    clearFieldErrors(passContainer);
+  }
+  const passChevron = document.getElementById("change-pass-chevron");
+  if (passChevron) passChevron.classList.remove("rotate-180");
+  const passToggleLabel = document.getElementById("change-pass-toggle-label");
+  if (passToggleLabel) passToggleLabel.textContent = "Change Password";
+  const currentPassInp = document.getElementById("edit-current-password");
+  if (currentPassInp) currentPassInp.value = "";
+  const newPassInp = document.getElementById("edit-new-password");
+  if (newPassInp) newPassInp.value = "";
+  const confirmPassInp = document.getElementById("edit-confirm-password");
+  if (confirmPassInp) confirmPassInp.value = "";
+
   modal.classList.remove("hidden");
 }
 
@@ -937,6 +1284,14 @@ function closeEditProfileModal() {
   if (window.SoundFX) SoundFX.playPop();
   const modal = document.getElementById("edit-profile-modal");
   if (modal) modal.classList.add("hidden");
+
+  // Clear password inputs on modal close
+  const currentPassInp = document.getElementById("edit-current-password");
+  if (currentPassInp) currentPassInp.value = "";
+  const newPassInp = document.getElementById("edit-new-password");
+  if (newPassInp) newPassInp.value = "";
+  const confirmPassInp = document.getElementById("edit-confirm-password");
+  if (confirmPassInp) confirmPassInp.value = "";
 }
 
 // =============================================================================
@@ -1295,7 +1650,7 @@ function renderPYQs(papers) {
             <span>•</span>
             <span>${escapeHTML(paper.pages)} Pages</span>
           </div>
-          <div class="mb-4">
+          <div class="mb-4 flex items-center gap-2 flex-wrap">
             ${paper.hasSolutions ? `
               <span class="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                 <i class="fa-solid fa-circle-check text-[10px]"></i> Solution Key Included
@@ -1305,6 +1660,9 @@ function renderPYQs(papers) {
                 <i class="fa-solid fa-circle-question text-[10px]"></i> Question Only
               </span>
             `}
+            <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-400 bg-white/[0.04] px-2 py-0.5 rounded border border-white/10" title="Permanent, verified academic archive (Tamper-proof)">
+              <i class="fa-solid fa-shield-halved text-[9px] text-emerald-400"></i> Protected Vault
+            </span>
           </div>
         </div>
         <div>
@@ -1630,22 +1988,22 @@ function renderActiveSwaps() {
               <img src="${swap.peerAvatar}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-white/20 shrink-0" alt="${escapeHTML(swap.peerName)}">
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <h4 class="text-xs sm:text-sm font-bold text-white truncate max-w-[110px] xs:max-w-[140px] sm:max-w-none" title="${escapeHTML(swap.peerName)}">${escapeHTML(swap.peerName)}</h4>
+                  <h4 class="text-xs sm:text-sm font-bold text-white truncate max-w-[110px] xs:max-w-[140px] sm:max-w-none" title="${escapeHTML(swap.peerName || 'Peer')}">${escapeHTML(swap.peerName || 'Peer')}</h4>
                   ${renderAiBadge(swap.isAi)}
                 </div>
-                <p class="text-[11px] sm:text-xs text-slate-400 truncate">${escapeHTML(swap.peerDepartment)} • ${escapeHTML(swap.peerSemester)}</p>
+                <p class="text-[11px] sm:text-xs text-slate-400 truncate">${escapeHTML(swap.peerDepartment || 'Campus Student')} • ${escapeHTML(swap.peerSemester || 'Sem 1')}</p>
               </div>
             </div>
             <div class="shrink-0 pt-0.5">${statusPills[swap.status]}</div>
           </div>
           <div class="space-y-2 mb-4 p-3 rounded-xl bg-white/5 border border-white/10">
             <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-chalkboard-user text-emerald-400 shrink-0"></i> <span class="truncate">${escapeHTML(swap.peerName.split(" ")[0])} Teaches:</span></span>
-              <span class="font-semibold text-emerald-300 ml-2 text-right truncate">${escapeHTML(swap.peerTeaches)}</span>
+              <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-chalkboard-user text-emerald-400 shrink-0"></i> <span class="truncate">${escapeHTML((swap.peerName || 'Peer').split(" ")[0])} Teaches:</span></span>
+              <span class="font-semibold text-emerald-300 ml-2 text-right truncate">${escapeHTML(swap.peerTeaches || 'Skills')}</span>
             </div>
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-graduation-cap text-indigo-400 shrink-0"></i> <span class="truncate">You Teach:</span></span>
-              <span class="font-semibold text-indigo-300 ml-2 text-right truncate">${escapeHTML(swap.peerLearns)}</span>
+              <span class="font-semibold text-indigo-300 ml-2 text-right truncate">${escapeHTML(swap.peerLearns || 'Knowledge')}</span>
             </div>
           </div>
           <div class="my-4">${stepperHtml}</div>
@@ -1731,6 +2089,7 @@ function renderPeerProfiles(departmentFilter = "ALL") {
   let peersList = [...STATE.peers];
   if (STATE.currentUser) {
     const user = STATE.currentUser;
+    const resolvedUserSkills = resolveCollegiateSkills(user);
     const existingIndex = peersList.findIndex(p => p.id === user.id || (p.email && user.email && p.email.toLowerCase() === user.email.toLowerCase()));
     if (existingIndex !== -1) {
       // Update data in place so latest changes are reflected immediately
@@ -1740,9 +2099,8 @@ function renderPeerProfiles(departmentFilter = "ALL") {
         department: user.department,
         semester: user.semester,
         karma: user.karma,
-        teachSkills: user.teachSkills || ["General Studies"],
-        learnSkills: user.learnSkills,
-              avatar: user.avatar || ["Programming"],
+        teachSkills: resolvedUserSkills.teach,
+        learnSkills: resolvedUserSkills.learn,
         bio: user.bio || peersList[existingIndex].bio,
         avatar: user.avatar || peersList[existingIndex].avatar,
         isAi: user.isAi || false
@@ -1762,9 +2120,8 @@ function renderPeerProfiles(departmentFilter = "ALL") {
         karma: user.karma,
         matchScore: 100,
         bio: user.bio || "Active collegiate student on CampusBarter ready to trade skills and knowledge.",
-        teachSkills: user.teachSkills || ["General Studies"],
-        learnSkills: user.learnSkills,
-              avatar: user.avatar || ["Web Development"]
+        teachSkills: resolvedUserSkills.teach,
+        learnSkills: resolvedUserSkills.learn
       });
     }
   }
@@ -1788,7 +2145,7 @@ function renderPeerProfiles(departmentFilter = "ALL") {
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <h3 class="text-sm sm:text-base font-bold text-white font-heading truncate max-w-[120px] xs:max-w-[150px] sm:max-w-none" title="${escapeHTML(peer.name)}">${escapeHTML(peer.name)}</h3>
-                  ${isSelf ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 shadow-sm shrink-0 whitespace-nowrap"><i class="fa-solid fa-user-check mr-1"></i> You</span>' : renderAiBadge(peer.isAi)}
+                  ${isSelf ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/25 text-indigo-300 border border-indigo-500/40 shadow-sm shrink-0 whitespace-nowrap"><i class="fa-solid fa-user-check mr-1"></i> You</span>' : renderAiBadge(peer.isAi, !peer.isAi)}
                 </div>
                 <p class="text-[11px] sm:text-xs text-slate-400 truncate">${escapeHTML(peer.department)} • ${escapeHTML(peer.semester)}</p>
               </div>
@@ -1835,42 +2192,185 @@ function renderPeerProfiles(departmentFilter = "ALL") {
   }).join("");
 }
 
-function populatePeerDropdown() {
+// =============================================================================
+// ENHANCED SEARCHABLE PEER SELECTION ENGINE
+// Supports dynamic keyword filtering across Real Students and AI Personas
+// =============================================================================
+function populatePeerDropdown(searchQuery = "", preselectedPeerId = null) {
   const peerSelect = document.getElementById("propose-target-peer");
+  const countBadge = document.getElementById("propose-peer-count-badge");
+  const clearBtn = document.getElementById("propose-peer-search-clear");
+  const searchInput = document.getElementById("propose-peer-search-input");
   if (!peerSelect) return;
+
+  // Toggle clear button
+  if (clearBtn && searchInput) {
+    if (searchInput.value.trim().length > 0) {
+      clearBtn.classList.remove("hidden");
+    } else {
+      clearBtn.classList.add("hidden");
+    }
+  }
+
   // Exclude logged in user to strictly enforce no self-barters
-  const eligiblePeers = STATE.peers.filter(p => {
+  const eligiblePeers = (STATE.peers || []).filter(p => {
     if (!STATE.currentUser) return true;
-    return p.id !== STATE.currentUser.id && (!p.email || !STATE.currentUser.email || p.email.toLowerCase() !== STATE.currentUser.email.toLowerCase());
+    const isSelfId = p.id === STATE.currentUser.id;
+    const isSelfEmail = p.email && STATE.currentUser.email && p.email.toLowerCase() === STATE.currentUser.email.toLowerCase();
+    return !isSelfId && !isSelfEmail;
   });
 
-  if (eligiblePeers.length === 0) {
-    peerSelect.innerHTML = `<option value="">No other peers available</option>`;
+  const query = (searchQuery || "").trim().toLowerCase();
+  const filtered = query.length === 0 
+    ? eligiblePeers 
+    : eligiblePeers.filter(p => {
+        const nameMatch = (p.name || "").toLowerCase().includes(query);
+        const deptMatch = (p.department || "").toLowerCase().includes(query);
+        const teachMatch = (p.teachSkills || []).some(s => s.toLowerCase().includes(query));
+        const learnMatch = (p.learnSkills || []).some(s => s.toLowerCase().includes(query));
+        const bioMatch = (p.bio || "").toLowerCase().includes(query);
+        return nameMatch || deptMatch || teachMatch || learnMatch || bioMatch;
+      });
+
+  const realStudents = filtered.filter(p => !p.isAi);
+  const aiPersonas = filtered.filter(p => p.isAi);
+
+  if (countBadge) {
+    if (query) {
+      countBadge.innerHTML = `<span class="text-indigo-400 font-bold">${filtered.length}</span> found`;
+    } else {
+      countBadge.innerHTML = `<span class="text-slate-400">${realStudents.length} Students • ${aiPersonas.length} AI Demos</span>`;
+    }
+  }
+
+  if (filtered.length === 0) {
+    peerSelect.innerHTML = `<option value="">No peers found matching "${escapeHTML(query)}"</option>`;
+    updateProposePeerPreview(null);
     return;
   }
 
-  peerSelect.innerHTML = eligiblePeers.map(p => {
-    const dept = (p.department || "General").split(" ")[0];
-    const skill = (p.teachSkills && p.teachSkills[0]) ? p.teachSkills[0] : "General";
-    return `<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)} (${escapeHTML(dept)} - ${escapeHTML(skill)})</option>`;
-  }).join("");
+  let html = `<option value="">-- Choose Peer to Barter With (${filtered.length} Available) --</option>`;
+
+  if (realStudents.length > 0) {
+    html += `<optgroup label="🎓 Registered College Students (${realStudents.length})">`;
+    realStudents.forEach(p => {
+      const dept = (p.department || "General").split(" ")[0];
+      const skills = (p.teachSkills && p.teachSkills.length > 0) ? p.teachSkills.join(", ") : "General";
+      html += `<option value="${escapeHTML(p.id)}">🎓 ${escapeHTML(p.name)} (${escapeHTML(dept)} • Teaches: ${escapeHTML(skills)})</option>`;
+    });
+    html += `</optgroup>`;
+  }
+
+  if (aiPersonas.length > 0) {
+    html += `<optgroup label="🤖 AI Demo Practice Peers (${aiPersonas.length})">`;
+    aiPersonas.forEach(p => {
+      const dept = (p.department || "General").split(" ")[0];
+      const skill = (p.teachSkills && p.teachSkills[0]) ? p.teachSkills[0] : "General";
+      html += `<option value="${escapeHTML(p.id)}">🤖 ${escapeHTML(p.name)} (${escapeHTML(dept)} • Teaches: ${escapeHTML(skill)})</option>`;
+    });
+    html += `</optgroup>`;
+  }
+
+  peerSelect.innerHTML = html;
+
+  if (preselectedPeerId) {
+    peerSelect.value = preselectedPeerId;
+  } else if (filtered.length === 1) {
+    peerSelect.value = filtered[0].id;
+  }
+
+  updateProposePeerPreview(peerSelect.value);
+}
+
+// Dynamic preview card when choosing peer in the proposal modal
+function updateProposePeerPreview(peerId) {
+  const previewCard = document.getElementById("propose-peer-preview-card");
+  const learnInput = document.getElementById("propose-learn-skill");
+  const teachInput = document.getElementById("propose-teach-skill");
+  if (!previewCard) return;
+
+  if (!peerId) {
+    previewCard.classList.add("hidden");
+    previewCard.innerHTML = "";
+    return;
+  }
+
+  const peer = (STATE.peers || []).find(p => p.id === peerId);
+  if (!peer) {
+    previewCard.classList.add("hidden");
+    previewCard.innerHTML = "";
+    return;
+  }
+
+  const badge = peer.isAi 
+    ? `<span class="badge-ai-bot shrink-0 text-[10px]"><i class="fa-solid fa-robot mr-1"></i>AI Demo</span>`
+    : `<span class="badge-real-user shrink-0 text-[10px]"><i class="fa-solid fa-circle-check mr-1"></i>Verified Student</span>`;
+
+  const teachSkills = peer.teachSkills && peer.teachSkills.length > 0 ? peer.teachSkills : ["General Studies"];
+  const teachBadges = teachSkills.map(s => 
+    `<button type="button" class="btn-peer-teach-skill text-[10px] px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/40 hover:border-emerald-400 font-semibold cursor-pointer" data-skill="${escapeHTML(s)}" title="Click to auto-fill into 'Skill You Want'">
+      <i class="fa-solid fa-plus text-[9px] mr-1"></i>${escapeHTML(s)}
+    </button>`
+  ).join(" ");
+
+  previewCard.innerHTML = `
+    <div class="relative shrink-0">
+      <img src="${peer.avatar || 'assets/images/avatar-default.jpg'}" class="w-10 h-10 rounded-xl object-cover border border-white/20">
+      <span class="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-900"></span>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 mb-1 flex-wrap">
+        <span class="font-bold text-xs text-white font-heading">${escapeHTML(peer.name)}</span>
+        ${badge}
+      </div>
+      <p class="text-[11px] text-slate-400 mb-1.5">${escapeHTML(peer.department || 'General')} • ${escapeHTML(peer.semester || 'Sem 1')}</p>
+      <div class="flex flex-col gap-1">
+        <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Skills Offered (Click to choose):</span>
+        <div class="flex flex-wrap gap-1">
+          ${teachBadges}
+        </div>
+      </div>
+    </div>
+  `;
+  previewCard.classList.remove("hidden");
+
+  // Auto-fill or suggest primary skill if input is empty
+  if (learnInput && !learnInput.value.trim() && teachSkills.length > 0) {
+    learnInput.value = teachSkills[0];
+  }
+  if (teachInput && !teachInput.value.trim() && STATE.currentUser && STATE.currentUser.teachSkills && STATE.currentUser.teachSkills.length > 0) {
+    teachInput.value = STATE.currentUser.teachSkills[0];
+  }
+
+  // Bind click handlers to quick-select pills
+  previewCard.querySelectorAll(".btn-peer-teach-skill").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const skill = btn.getAttribute("data-skill");
+      if (skill && learnInput) {
+        learnInput.value = skill;
+        if (window.SoundFX) SoundFX.playPop();
+        learnInput.focus();
+        showToast(`Selected "${skill}" as skill you want from ${peer.name}!`, "info", "fa-graduation-cap");
+      }
+    });
+  });
 }
 
 function proposeSwapToPeer(peerId) {
   if (!STATE.currentUser) {
-      showToast("Please log in or sign up first to propose a barter!", "warning", "fa-user-lock");
-      setTimeout(() => { window.location.href = "login.html#signup"; }, 800);
-      return;
-    }
+    showToast("Please log in or sign up first to propose a barter!", "warning", "fa-user-lock");
+    setTimeout(() => { window.location.href = "login.html#signup"; }, 800);
+    return;
+  }
   if (STATE.currentUser.id === peerId) {
     showToast("You cannot propose a barter exchange with yourself!", "warning", "fa-circle-exclamation");
     return;
   }
   const modal = document.getElementById("propose-swap-modal");
-  const peerSelect = document.getElementById("propose-target-peer");
+  const searchInput = document.getElementById("propose-peer-search-input");
   if (!modal) return;
-  populatePeerDropdown();
-  if (peerSelect) peerSelect.value = peerId;
+  if (searchInput) searchInput.value = "";
+  populatePeerDropdown("", peerId);
   if (window.SoundFX) SoundFX.playWhoosh();
   modal.classList.remove("hidden");
 }
@@ -1893,7 +2393,12 @@ function setupModalTriggers() {
         return;
       }
       if (window.SoundFX) SoundFX.playWhoosh();
+      const searchInput = document.getElementById("propose-peer-search-input");
+      if (searchInput) searchInput.value = "";
+      populatePeerDropdown("");
       if (proposeModal) proposeModal.classList.remove("hidden");
+      // Trigger background sync to fetch latest registered peers from cloud
+      syncPeersFromCloud();
     });
   }
 
@@ -1962,6 +2467,33 @@ function setupModalTriggers() {
 }
 
 function setupModalForms() {
+  // ---------------------------------------------------------------------------
+  // LIVE PEER SEARCH & AUTO-PREVIEW HANDLERS
+  // ---------------------------------------------------------------------------
+  const peerSearchInput = document.getElementById("propose-peer-search-input");
+  const peerSearchClear = document.getElementById("propose-peer-search-clear");
+  const peerSelect = document.getElementById("propose-target-peer");
+
+  if (peerSearchInput) {
+    peerSearchInput.addEventListener("input", (e) => {
+      populatePeerDropdown(e.target.value);
+    });
+  }
+
+  if (peerSearchClear && peerSearchInput) {
+    peerSearchClear.addEventListener("click", () => {
+      peerSearchInput.value = "";
+      populatePeerDropdown("");
+      peerSearchInput.focus();
+    });
+  }
+
+  if (peerSelect) {
+    peerSelect.addEventListener("change", (e) => {
+      updateProposePeerPreview(e.target.value);
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // FORM 1: PROPOSE BARTER (Custom Validation + Inline Kinetic Loader)
   // ---------------------------------------------------------------------------
@@ -2049,10 +2581,25 @@ function setupModalForms() {
       updateSwapCounters();
       updateGlobalStats();
 
+      // Synchronize barter proposal into Supabase Cloud Swaps
+      if (typeof DataManager !== "undefined" && typeof DataManager.createSwap === "function" && STATE.currentUser) {
+        DataManager.createSwap({
+          requester_id: STATE.currentUser.id,
+          peer_id: peer.id,
+          requester_teaches: teachSkill,
+          peer_teaches: learnSkill,
+          notes: pitch
+        }).catch(err => console.warn("[CampusBarter Backend] Cloud swap sync warning:", err));
+      }
+
       hideEnergyBeam(proposeForm);
       setButtonLoading(submitBtn, false);
       document.getElementById("propose-swap-modal").classList.add("hidden");
       proposeForm.reset();
+      const pSearch = document.getElementById("propose-peer-search-input");
+      if (pSearch) pSearch.value = "";
+      updateProposePeerPreview(null);
+
       if (window.SoundFX) SoundFX.playSuccess();
       showToast(`Barter proposal sent to ${escapeHTML(peer.name)}! Status: Pending`, "success", "fa-paper-plane");
     });
@@ -2313,6 +2860,59 @@ function setupModalForms() {
         if (!firstErrorField) firstErrorField = driveUrlInput;
       }
 
+      // =====================================================================
+      // STRICT DEDUPLICATION & ANTI-FARMING ENGINE:
+      // Prevent duplicate paper uploads for the exact same subject/code,
+      // semester, exam type, and year. Protects repository from clutter and
+      // blocks users from gaming the +25 Karma reward system.
+      // =====================================================================
+      if (!hasError) {
+        const cleanCode = code.replace(/[\s-_]/g, "");
+        const cleanSubject = subject.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const cleanSem = semester.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const cleanExam = examType.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+        const existingDuplicate = (STATE.pyqs || []).find(p => {
+          const pCode = (p.code || "").toUpperCase().replace(/[\s-_]/g, "");
+          const pSubj = (p.subject || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+          const pSem = (p.semester || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+          const pExam = (p.examType || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+          const pYear = parseInt(p.year, 10);
+
+          // Academic match: Same course code OR same subject name
+          const isSameCourse = (cleanCode && pCode && cleanCode === pCode) ||
+                               (cleanSubject && pSubj && (cleanSubject === pSubj || cleanSubject.includes(pSubj) || pSubj.includes(cleanSubject)));
+
+          // Exam context match: Same exam type (CIA-1, CIA-2, Semester End) + same year + same semester
+          const isSameExam = cleanExam === pExam;
+          const isSameYear = pYear === year;
+          const isSameSem = cleanSem === pSem;
+
+          // File name match (if local file selected and existing record has fileName)
+          const isSameFileName = currentSelectedFile && p.fileName && p.fileName.toLowerCase() === currentSelectedFile.name.toLowerCase();
+
+          return (isSameCourse && isSameExam && isSameYear && isSameSem) || isSameFileName;
+        });
+
+        if (existingDuplicate) {
+          hasError = true;
+          const dupLabel = `${existingDuplicate.subject} (${existingDuplicate.code}) • ${existingDuplicate.semester} • ${existingDuplicate.examType} ${existingDuplicate.year}`;
+          showFieldError(codeInput, "Duplicate paper! This exam already exists in the Academic Vault.");
+          showFieldError(subjectInput, "Paper already archived in vault.");
+          if (!firstErrorField) firstErrorField = codeInput;
+
+          if (window.SoundFX) SoundFX.playError();
+          showToast(`Duplicate Rejected! An official paper for "${dupLabel}" already exists in the Academic Vault. Duplicate uploads and +25⚡ Karma farming are blocked to maintain repository integrity.`, "error", "fa-triangle-exclamation");
+
+          // Focus & filter grid to show existing paper so user can download it instead
+          const searchInput = document.getElementById("pyq-search-input");
+          if (searchInput) {
+            searchInput.value = existingDuplicate.code || existingDuplicate.subject;
+            filterAndRenderPYQs();
+          }
+        }
+      }
+
       if (hasError) {
         if (firstErrorField) firstErrorField.focus();
         return;
@@ -2386,6 +2986,8 @@ function setupModalForms() {
         rating: 5.0,
         fileUrl: finalFileUrl,
         fileBlobUrl: localBlobUrl,
+        fileName: currentSelectedFile ? currentSelectedFile.name : null,
+        isProtected: true,
         driveFolder: subject,
         uploader: STATE.currentUser ? STATE.currentUser.name : "Anonymous Student",
         isAi: STATE.currentUser ? !!STATE.currentUser.isAi : false,
@@ -2667,6 +3269,144 @@ function setupModalForms() {
       }
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // PROFILE MODAL: ACCOUNT SECURITY / CHANGE PASSWORD HANDLERS
+  // ---------------------------------------------------------------------------
+  const togglePassBtn = document.getElementById("toggle-change-password-btn");
+  const passContainer = document.getElementById("change-password-container");
+  const passChevron = document.getElementById("change-pass-chevron");
+  const passToggleLabel = document.getElementById("change-pass-toggle-label");
+
+  if (togglePassBtn && passContainer) {
+    togglePassBtn.addEventListener("click", () => {
+      const isHidden = passContainer.classList.contains("hidden");
+      if (isHidden) {
+        passContainer.classList.remove("hidden");
+        if (passChevron) passChevron.classList.add("rotate-180");
+        if (passToggleLabel) passToggleLabel.textContent = "Hide Section";
+        if (window.SoundFX) SoundFX.playPop();
+      } else {
+        passContainer.classList.add("hidden");
+        if (passChevron) passChevron.classList.remove("rotate-180");
+        if (passToggleLabel) passToggleLabel.textContent = "Change Password";
+        if (window.SoundFX) SoundFX.playPop();
+      }
+    });
+  }
+
+  const updatePassBtn = document.getElementById("btn-update-password");
+  if (updatePassBtn) {
+    updatePassBtn.addEventListener("click", async () => {
+      const user = STATE.currentUser;
+      if (!user) {
+        showToast("Please log in first to change your password!", "warning", "fa-user-lock");
+        return;
+      }
+
+      const currentPassInp = document.getElementById("edit-current-password");
+      const newPassInp = document.getElementById("edit-new-password");
+      const confirmPassInp = document.getElementById("edit-confirm-password");
+
+      const currentPass = currentPassInp ? currentPassInp.value : "";
+      const newPass = newPassInp ? newPassInp.value : "";
+      const confirmPass = confirmPassInp ? confirmPassInp.value : "";
+
+      if (passContainer) clearFieldErrors(passContainer);
+
+      let hasError = false;
+      let firstErrorField = null;
+
+      // Verify current password if user has one stored
+      if (user.password) {
+        if (!currentPass) {
+          showFieldError(currentPassInp, "Please enter your current password");
+          hasError = true;
+          firstErrorField = currentPassInp;
+        } else if (String(currentPass) !== String(user.password)) {
+          showFieldError(currentPassInp, "Current password does not match!");
+          hasError = true;
+          firstErrorField = currentPassInp;
+        }
+      }
+
+      if (!newPass) {
+        showFieldError(newPassInp, "Please enter a new password");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = newPassInp;
+      } else if (newPass.length < 4) {
+        showFieldError(newPassInp, "New password must be at least 4 characters");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = newPassInp;
+      } else if (user.password && newPass === user.password) {
+        showFieldError(newPassInp, "New password must be different from current password");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = newPassInp;
+      }
+
+      if (!confirmPass) {
+        showFieldError(confirmPassInp, "Please confirm your new password");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = confirmPassInp;
+      } else if (newPass !== confirmPass) {
+        showFieldError(confirmPassInp, "Passwords do not match");
+        hasError = true;
+        if (!firstErrorField) firstErrorField = confirmPassInp;
+      }
+
+      if (hasError) {
+        if (firstErrorField) firstErrorField.focus();
+        return;
+      }
+
+      setButtonLoading(updatePassBtn, true, "Updating Password...");
+
+      try {
+        // 1. Update in-memory user
+        user.password = newPass;
+        setStoredCurrentUser(user);
+
+        // 2. Update in accounts array & localStorage
+        const accounts = getStoredAccounts();
+        const accIdx = accounts.findIndex(a => a.id === user.id || (a.email && a.email.toLowerCase() === user.email.toLowerCase()));
+        if (accIdx !== -1) {
+          accounts[accIdx].password = newPass;
+        } else {
+          accounts.push(user);
+        }
+        saveStoredAccounts(accounts);
+        STATE.accounts = accounts;
+
+        // 3. Sync to Supabase Cloud if online
+        if (typeof DataManager !== "undefined" && typeof DataManager.updatePassword === "function") {
+          try {
+            await DataManager.updatePassword(user.email, newPass);
+          } catch (cloudErr) {
+            console.warn("Cloud password sync warning:", cloudErr.message);
+          }
+        }
+
+        await new Promise(r => setTimeout(r, 400));
+        setButtonLoading(updatePassBtn, false);
+
+        // Clear inputs & collapse section
+        if (currentPassInp) currentPassInp.value = "";
+        if (newPassInp) newPassInp.value = "";
+        if (confirmPassInp) confirmPassInp.value = "";
+        if (passContainer) passContainer.classList.add("hidden");
+        if (passChevron) passChevron.classList.remove("rotate-180");
+        if (passToggleLabel) passToggleLabel.textContent = "Change Password";
+
+        if (window.SoundFX) SoundFX.playSuccess();
+        showToast("Password updated successfully! 🔒 Keep it safe.", "success", "fa-shield-halved");
+
+      } catch (err) {
+        setButtonLoading(updatePassBtn, false);
+        if (window.SoundFX) SoundFX.playError();
+        showToast("Failed to update password: " + err.message, "error", "fa-triangle-exclamation");
+      }
+    });
+  }
 }
 
 // =============================================================================
@@ -2734,49 +3474,37 @@ function initCreativePreloader() {
   const audioPrompt = document.getElementById("preloader-audio-prompt");
 
   let isCompleted = false;
+  let audioUnlocked = false;
 
-  const triggerAudioStart = () => {
-    if (isCompleted) return;
-    if (window.SoundFX && !SoundFX.isMuted()) {
-      if (typeof SoundFX.unlock === "function") {
-        SoundFX.unlock().then(() => {
-          SoundFX.playLoaderStart();
-          if (audioPrompt) {
-            audioPrompt.innerHTML = '<i class="fa-solid fa-volume-high text-emerald-400 animate-pulse"></i> <span>Audio Active &bull; Charging...</span>';
-            audioPrompt.classList.add("border-emerald-400/60", "text-white");
-          }
-        }).catch(() => {
-          SoundFX.playLoaderStart();
-        });
-      } else {
-        SoundFX.playLoaderStart();
-      }
+  const tryUnlockAudio = () => {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    if (window.SoundFX) {
+      SoundFX.init();
+      SoundFX.playLoaderStart();
+    }
+    if (audioPrompt) {
+      audioPrompt.innerHTML = `
+        <span class="preloader-audio-icon-wrap text-emerald-400">
+          <i class="fa-solid fa-volume-high"></i>
+        </span>
+        <span class="preloader-audio-text font-bold text-white">Sound Initialized! <i class="fa-solid fa-check ml-1 text-emerald-400"></i></span>
+      `;
+      audioPrompt.classList.add("border-emerald-400");
     }
   };
-
-  // Attempt initial playback immediately (runs if browser allows autoplay)
-  triggerAudioStart();
-
-  // Active gesture unlocker: The first click, tap, or keypress anywhere on screen unlocks audio and starts charging sound
-  const unlockAndStartSound = () => {
-    triggerAudioStart();
-  };
-
-  ['pointerdown', 'mousedown', 'touchstart', 'keydown', 'click'].forEach(evt => {
-    window.addEventListener(evt, unlockAndStartSound, { passive: true, once: true });
-  });
 
   if (audioPrompt) {
     audioPrompt.addEventListener("click", (e) => {
       e.stopPropagation();
-      triggerAudioStart();
+      tryUnlockAudio();
     });
   }
 
-  // Clicking anywhere on preloader screen unlocks sound
-  preloader.addEventListener("click", () => {
-    triggerAudioStart();
-  });
+  // Also unlock audio on user gesture anywhere on preloader
+  preloader.addEventListener("pointerdown", () => {
+    tryUnlockAudio();
+  }, { once: true });
 
   const finishPreloader = () => {
     if (isCompleted) return;
@@ -2785,10 +3513,6 @@ function initCreativePreloader() {
     if (progressBar) progressBar.style.width = "100%";
     if (pctText) pctText.textContent = "100%";
     if (statusText) statusText.textContent = "Welcome to CampusBarter!";
-
-    if (window.SoundFX && !SoundFX.isMuted()) {
-      SoundFX.playLoaderComplete();
-    }
 
     // Seamless Transition: Trigger UI update to guarantee logged-in user profile, avatar, and karma reflect immediately
     try {
@@ -2807,23 +3531,31 @@ function initCreativePreloader() {
     setTimeout(() => {
       preloader.style.display = "none";
       try { preloader.remove(); } catch (e) {}
-    }, 700);
+    }, 400);
   };
 
   if (skipBtn) {
     skipBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      triggerAudioStart();
       finishPreloader();
     });
   }
 
-  // Smooth cinematic progress sequence (total duration ~2.4s)
+  // Keyboard shortcut to skip preloader
+  const handleKeydown = (e) => {
+    if (e.key === "Escape" || e.key === "Enter" || e.key === " ") {
+      window.removeEventListener("keydown", handleKeydown);
+      finishPreloader();
+    }
+  };
+  window.addEventListener("keydown", handleKeydown);
+
+  // Cinematic 4-stage loading sequence with SoundFX audio cues (~2.4s total)
   const steps = [
-    { pct: 28, text: "Preparing campus workspace...", delay: 350 },
-    { pct: 58, text: "Loading question papers & peer network...", delay: 850 },
-    { pct: 86, text: "Syncing karma wallet & study resources...", delay: 1450 },
-    { pct: 100, text: "Welcome to CampusBarter!", delay: 2050 }
+    { pct: 28, text: "Syncing verified campus peers...", delay: 400 },
+    { pct: 58, text: "Indexing decentralized paper vaults...", delay: 1000 },
+    { pct: 86, text: "Securing student barter handshake...", delay: 1650 },
+    { pct: 100, text: "Welcome to CampusBarter!", delay: 2200 }
   ];
 
   steps.forEach(step => {
@@ -2833,9 +3565,12 @@ function initCreativePreloader() {
       if (pctText) pctText.textContent = `${step.pct}%`;
       if (statusText) statusText.textContent = step.text;
 
-      // Dynamically ramp charging core frequency and ring milestone chimes
-      if (window.SoundFX && step.pct < 100) {
-        SoundFX.updateLoaderProgress(step.pct);
+      if (window.SoundFX) {
+        if (step.pct === 100) {
+          SoundFX.playLoaderComplete();
+        } else {
+          SoundFX.updateLoaderProgress(step.pct);
+        }
       }
 
       if (step.pct === 100) {
@@ -2935,33 +3670,37 @@ function tickTokenRefillTimer() {
   const user = STATE.currentUser;
   if (!user) return;
 
+  const navTimer = document.getElementById("nav-refill-timer");
+  const navBadge = document.getElementById("nav-refill-badge");
+  const navPill = document.getElementById("token-refill-pill");
+  const mobileTimer = document.getElementById("mobile-refill-timer");
+  const dropTimer = document.getElementById("dropdown-refill-timer");
+  const dropProgress = document.getElementById("dropdown-refill-progress");
+  const modal = document.getElementById("token-refill-modal");
+  const modalTimer = document.getElementById("modal-refill-countdown");
+  const modalProgress = document.getElementById("modal-refill-progress");
+  const modalStatus = document.getElementById("modal-refill-status");
+
   // RULE: If balance is at or above 120 Karma, refill is paused at max cap
   if (user.karma >= MAX_REFILL_CAP) {
     user.lastRefillTime = Date.now();
 
-    const navTimer = document.getElementById("nav-refill-timer");
     if (navTimer && navTimer.textContent !== "120 Max (Full)") {
       navTimer.textContent = "120 Max (Full)";
-      const navBadge = document.getElementById("nav-refill-badge");
       if (navBadge) navBadge.textContent = "Paused";
-      const navPill = document.getElementById("token-refill-pill");
       if (navPill) {
         navPill.title = `Karma Refill Paused: Balance (${user.karma} Karma) is at or above the 120 Karma cap. Refill resumes if balance drops below 120.`;
       }
     }
 
-    const modal = document.getElementById("token-refill-modal");
     if (modal && !modal.classList.contains("hidden")) {
-      const modalTimer = document.getElementById("modal-refill-countdown");
       if (modalTimer && modalTimer.textContent !== "120 CAP REACHED") {
         modalTimer.textContent = "120 CAP REACHED";
         modalTimer.className = "text-2xl sm:text-3xl font-black font-mono text-emerald-400 my-1";
-        const modalProgress = document.getElementById("modal-refill-progress");
         if (modalProgress) {
           modalProgress.style.width = "100%";
           modalProgress.className = "bg-emerald-400 h-full w-full transition-all duration-500";
         }
-        const modalStatus = document.getElementById("modal-refill-status");
         if (modalStatus) {
           modalStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Refill Paused &bull; Balance (${user.karma} Karma) is at or above 120 cap</span>`;
         }
@@ -3066,6 +3805,32 @@ function closeTokenRefillModal() {
 window.openTokenRefillModal = openTokenRefillModal;
 window.closeTokenRefillModal = closeTokenRefillModal;
 
+// Expose core action handlers to global window for DevTools & automated QA suites
+window.downloadPYQ = downloadPYQ;
+window.previewPYQ = previewPYQ;
+window.acceptSwap = acceptSwap;
+window.declineSwap = declineSwap;
+window.completeSwap = completeSwap;
+window.openScheduleModal = openScheduleModal;
+window.proposeSwapToPeer = proposeSwapToPeer;
+window.populatePeerDropdown = populatePeerDropdown;
+window.updateProposePeerPreview = updateProposePeerPreview;
+window.renderNavbarAuth = renderNavbarAuth;
+window.renderPeerProfiles = renderPeerProfiles;
+window.renderActiveSwaps = renderActiveSwaps;
+window.filterAndRenderPYQs = filterAndRenderPYQs;
+window.updateGlobalStats = updateGlobalStats;
+window.updateSwapCounters = updateSwapCounters;
+window.showToast = showToast;
+window.playSFX = function(type) {
+  if (!window.SoundFX) return;
+  if (type === 'success') SoundFX.playSuccess();
+  else if (type === 'error') SoundFX.playError();
+  else if (type === 'whoosh') SoundFX.playWhoosh();
+  else if (type === 'pop') SoundFX.playPop();
+  else SoundFX.playClick(type || 'glass');
+};
+
 // =============================================================================
 // 11. DOM CONTENT LOADED INITIALIZER
 // =============================================================================
@@ -3112,7 +3877,17 @@ function initApp() {
 
   // 5. Karma Token Refill Engine
   try { initTokenRefillEngine(); } catch (e) { console.warn("[Refill Engine]", e); }
+
+  // 6. Asynchronous Real Peer & Cloud Sync (Fetches all registered students)
+  try { syncPeersFromCloud(); } catch (e) { console.warn("[Cloud Peer Sync]", e); }
 }
+
+// Automatically refresh real peer profiles when student returns to tab
+window.addEventListener("focus", () => {
+  if (typeof syncPeersFromCloud === "function") {
+    syncPeersFromCloud();
+  }
+});
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initApp);

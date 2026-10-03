@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>CampusBarter | Trade Skills & Academic Resource Hub</title>
+  <meta name="author" content="Aryanraj &amp; Shantanu">
+  <meta name="description" content="CampusBarter - Collegiate Peer-to-Peer Academic Barter &amp; Question Vault created by Aryanraj &amp; Shantanu">
+  <title>CampusBarter | Trade Skills &amp; Academic Resource Hub</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -79,11 +81,14 @@
         </div>
       </div>
 
-      <!-- Interactive Audio Prompt -->
-      <div id="preloader-audio-prompt" class="preloader-audio-prompt" title="Click anywhere to activate sound">
-        <i class="fa-solid fa-volume-high text-emerald-400"></i>
-        <span>Click anywhere to launch with sound</span>
-      </div>
+      <!-- Interactive Audio Activation Prompt -->
+      <button id="preloader-audio-prompt" class="preloader-audio-prompt preloader-audio-chip" title="Click to enable cinematic sound effects">
+        <span class="preloader-audio-icon-wrap">
+          <i class="fa-solid fa-volume-high"></i>
+          <span class="audio-pulse-ring"></span>
+        </span>
+        <span class="preloader-audio-text">Sound Enabled <span class="audio-dot">&bull;</span> Tap anywhere to begin</span>
+      </button>
 
       <!-- Quick Skip Option -->
       <button id="preloader-skip-btn" class="preloader-skip" title="Enter instantly">
@@ -139,16 +144,12 @@
         </a>
       </nav>
 
-      <!-- Auth & User Profile Zone (Dynamic: Logged Out vs Logged In) -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- SFX Audio Control Toggle -->
-        <button id="sfx-toggle-btn" class="btn-glass px-2.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-300 hover:text-white" title="Toggle Sound Effects" aria-label="Toggle Sound Effects">
-          <i id="sfx-toggle-icon" class="fa-solid fa-volume-high text-emerald-400"></i>
-          <span id="sfx-toggle-label" class="hidden sm:inline text-[11px] font-mono">SFX ON</span>
-        </button>
-
-
         <div id="nav-auth-zone" class="flex items-center gap-2 sm:gap-3">
+          <!-- Web Audio API Sound Effects Toggle Button -->
+          <button id="sfx-toggle-btn" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/15 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-medium cursor-pointer" title="Toggle Sound Effects" aria-label="Toggle Sound Effects">
+            <i id="sfx-toggle-icon" class="fa-solid fa-volume-high text-emerald-400"></i>
+            <span id="sfx-toggle-label" class="hidden lg:inline text-[11px] font-mono">SFX ON</span>
+          </button>
           <a href="login.html#login" class="btn-glass text-xs px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl font-medium cursor-pointer">Log In</a>
           <a href="login.html#signup" class="hidden sm:inline-flex btn-emerald text-xs px-4 py-2 rounded-xl font-bold items-center gap-1.5 shadow-lg shadow-emerald-500/25 cursor-pointer">
             <i class="fa-solid fa-sparkles"></i> Sign Up (+300 Karma)
@@ -177,7 +178,7 @@
   </header>
 
   <!-- ========================================================================
-       HERO & VALUE BANNER (Decluttered, Modern, Focused)
+       HERO & VALUE BANNER
        ======================================================================== -->
   <section class="relative z-10 pt-8 pb-6 px-4 sm:px-8 max-w-7xl mx-auto">
     <div class="glass-card p-4 sm:p-8 md:p-10 border-white/15 relative overflow-hidden">
@@ -197,18 +198,18 @@
             The collegiate barter network where Xavier's students exchange academic skills for study resources. Trade coding practice for math revision, download verified past semester question papers, and earn karma helping peers.
           </p>
 
-          <!-- Focused 2-Action Button Group -->
+          <!-- CTA Action Row -->
           <div class="reveal-item stagger-4 flex flex-wrap items-center gap-3">
             <a href="#pyq-section" class="btn-emerald px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/25 hover:scale-[1.02] transition-transform">
               <i class="fa-solid fa-file-pdf"></i>
-              <span>Explore PYQ Bank</span>
+              <span>Access PYQ Papers (-15⚡)</span>
             </a>
             <a href="#profiles-section" class="btn-glass px-5 py-3 rounded-xl text-sm font-semibold flex items-center gap-2 text-slate-200 hover:text-white hover:bg-white/10 transition-colors">
               <i class="fa-solid fa-users text-sky-400"></i>
-              <span>Find Peer Mentors</span>
+              <span>Find Study Peers</span>
             </a>
-            <a href="#about-section" class="text-xs text-slate-400 hover:text-white transition-colors ml-2 hidden sm:inline-flex items-center gap-1">
-              <i class="fa-solid fa-circle-question text-sky-400"></i>
+            <a href="#about-section" class="btn-glass px-4 py-3 rounded-xl text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-question text-amber-400"></i>
               <span>How Barter Works</span>
             </a>
           </div>
@@ -269,10 +270,6 @@
       </div>
 
       <div class="flex items-center gap-2.5 flex-wrap">
-        <a href="https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link" target="_blank" class="btn-glass text-xs px-3.5 py-2.5 rounded-xl font-bold flex items-center gap-2 text-emerald-300 hover:text-white border-emerald-500/30 hover:bg-emerald-500/20 transition-all shadow-sm" title="Open Official Google Drive Archive">
-          <i class="fa-brands fa-google-drive text-emerald-400 text-sm"></i>
-          <span>Official Drive Archive</span>
-        </a>
         <button id="trigger-upload-banner-btn" class="btn-emerald text-xs px-4 py-2.5 rounded-xl font-bold flex items-center gap-2">
           <i class="fa-solid fa-cloud-arrow-up"></i>
           <span>Upload Paper (+25⚡)</span>
@@ -348,11 +345,11 @@
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
       <div>
         <div class="flex items-center gap-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">
-          <i class="fa-solid fa-network-wired"></i>
+          <i class="fa-solid fa-arrow-right-arrow-left"></i>
           <span>Peer State Pipeline</span>
         </div>
         <h2 class="text-2xl sm:text-3xl font-extrabold font-heading text-white">Active Swap State Machine</h2>
-        <p class="text-slate-400 text-xs sm:text-sm mt-1">Track your 4-phase learning exchanges. Both members receive +50 Karma upon completion.</p>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1">Real-time status transitions: Proposed, Accepted, Scheduled, and Completed (+50⚡ Karma for both peers).</p>
       </div>
 
       <!-- Action Button to Trigger New Barter Modal -->
@@ -422,13 +419,13 @@
         <p class="text-slate-400 text-xs sm:text-sm mt-1">Connect with verified campus peers offering skills you need and seeking skills you have.</p>
       </div>
 
-      <!-- Department Filter Pills & Quick Edit Profile Button -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <button id="section-edit-profile-btn" onclick="openEditProfileModal()" class="btn-glass px-3.5 py-2 rounded-xl text-xs font-bold text-indigo-300 hover:text-white border-indigo-500/30 flex items-center gap-2 hover:bg-indigo-500/20 transition-all shadow-sm">
+      <!-- Department Filter & Profile Edit Trigger -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="trigger-edit-profile-btn" class="btn-glass px-3.5 py-2 rounded-xl text-xs font-semibold text-indigo-300 hover:text-white border border-indigo-500/30 hover:border-indigo-400 flex items-center gap-1.5 cursor-pointer">
           <i class="fa-solid fa-user-pen text-indigo-400"></i>
           <span>Edit My Profile & Skills</span>
         </button>
-        <span class="text-xs text-slate-400 hidden sm:inline ml-1">Department:</span>
+        <span class="text-xs text-slate-400 hidden sm:inline">Filter Department:</span>
         <select id="filter-peer-dept" class="glass-input rounded-xl px-3 py-2 text-xs cursor-pointer">
           <option value="ALL">All Departments</option>
           <option value="Computer Science">Computer Science</option>
@@ -458,10 +455,10 @@
           <i class="fa-solid fa-circle-info text-[11px]"></i> ABOUT CAMPUSBARTER
         </span>
         <h2 class="text-2xl sm:text-4xl font-extrabold font-heading text-white tracking-tight mb-3">
-          Decentralized Knowledge Exchange & Academic Archive
+          Collegiate Skill Barter &amp; Academic Knowledge Exchange
         </h2>
         <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
-          CampusBarter is a collegiate peer-to-peer ecosystem where students trade their academic strengths, review verified previous year exam papers, and earn Karma without transactional money.
+          CampusBarter is a collaborative campus platform where Xavier's students exchange academic skills, download verified exam papers, and earn Karma points together.
         </p>
       </div>
 
@@ -616,17 +613,50 @@
 
       <form id="propose-swap-form" class="space-y-3.5" novalidate>
         <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Select Peer</label>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-semibold text-slate-300">
+              <i class="fa-solid fa-users text-indigo-400 mr-1"></i> Select Peer
+            </label>
+            <span id="propose-peer-count-badge" class="text-[10px] text-slate-400">Loading peers...</span>
+          </div>
+
+          <!-- Dynamic Keyword Search & Skill Filter Bar -->
+          <div class="relative mb-2">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            <input 
+              type="text" 
+              id="propose-peer-search-input" 
+              placeholder="Search peers by name, skill (e.g. Python, React), or department..." 
+              class="w-full glass-input rounded-xl pl-8 pr-8 py-2 text-xs text-white placeholder-slate-400 focus:border-indigo-400 transition-all"
+              autocomplete="off"
+            >
+            <button 
+              type="button" 
+              id="propose-peer-search-clear" 
+              class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs p-1"
+              title="Clear search filter"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
           <select id="propose-target-peer" required class="w-full glass-input rounded-xl px-3 py-2 text-xs cursor-pointer"></select>
+
+          <!-- Selected Peer Details & Skill Quick-Select Preview -->
+          <div id="propose-peer-preview-card" class="mt-2.5 p-3 rounded-xl bg-slate-900/80 border border-indigo-500/25 flex items-start gap-3 hidden transition-all"></div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-emerald-400 mb-1">Skill You Will Teach</label>
+          <label class="block text-xs font-semibold text-emerald-400 mb-1">
+            <i class="fa-solid fa-chalkboard-user mr-1"></i> Skill You Will Teach
+          </label>
           <input type="text" id="propose-teach-skill" required placeholder="e.g. Graph BFS Traversal" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-indigo-300 mb-1">Skill You Want from Peer</label>
+          <label class="block text-xs font-semibold text-indigo-300 mb-1">
+            <i class="fa-solid fa-graduation-cap mr-1"></i> Skill You Want from Peer
+          </label>
           <input type="text" id="propose-learn-skill" required placeholder="e.g. React State Lifecycle" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
         </div>
 
@@ -782,9 +812,10 @@
               <input type="url" id="upload-drive-url" placeholder="https://drive.google.com/file/d/... (Optional if file is selected above)" class="w-full glass-input rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500">
               <div class="flex items-center justify-between text-[10px] text-slate-400">
                 <span>If no file is attached above, this Drive URL will be used.</span>
-                <a href="https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link" target="_blank" class="text-emerald-400 hover:underline flex items-center gap-1">
-                  <span>Open Master Folder</span> <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
-                </a>
+                <span class="text-emerald-400 font-mono text-[10px] flex items-center gap-1" title="Submissions are securely routed to verified academic cloud storage">
+                  <i class="fa-solid fa-shield-halved text-[9px]"></i>
+                  <span>Protected Destination</span>
+                </span>
               </div>
             </div>
           </details>
@@ -1103,6 +1134,12 @@
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             Campus Network Status: Online & Active
           </div>
+          <div class="pt-1 flex items-center gap-2 text-xs text-slate-400">
+            <span class="text-[11px] font-medium">Developers:</span>
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold flex items-center gap-1.5">
+              <i class="fa-solid fa-code text-indigo-400 text-[10px]"></i> Aryanraj × Shantanu
+            </span>
+          </div>
         </div>
 
         <!-- Col 2: Navigation Links -->
@@ -1162,9 +1199,16 @@
 
       <!-- Bottom Bar -->
       <div class="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-[11px] text-slate-400">
-          © 2025 CampusBarter. Built with HTML, Tailwind CSS & Vanilla JavaScript. Open student exchange.
-        </p>
+        <div class="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
+          <p class="text-[11px] text-slate-400">
+            © 2026 CampusBarter. Built with HTML, Tailwind CSS & Vanilla JavaScript. Open student exchange.
+          </p>
+          <span class="hidden sm:inline text-slate-600">•</span>
+          <p class="text-[11px] text-slate-300 flex items-center gap-1.5">
+            <span>Made by</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-bold tracking-wide">Aryanraj × Shantanu</span>
+          </p>
+        </div>
 
         <!-- Back to Top Button -->
         <a href="#home" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/15 text-slate-300 hover:text-white transition-all flex items-center gap-1.5 text-xs font-medium">
@@ -1254,7 +1298,7 @@
         document.body.classList.add("page-revealed");
         setTimeout(function() { p.style.display = "none"; }, 600);
       }
-    }, 2500);
+    }, 3500);
   </script>
 </body>
 </html>
