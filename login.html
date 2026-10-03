@@ -369,6 +369,9 @@
 
   <!-- Standalone Login & Sign Up Logic with Creative Loader & Custom Validation -->
   <script>
+    // Google Apps Script Webhook URL for Password Reset OTP and PDF uploads
+    const GOOGLE_DRIVE_WEBHOOK_URL = localStorage.getItem("cb_gdrive_webhook_url") || "https://script.google.com/macros/s/AKfycbxentAPYMzbQ01LzsRCC5ZU4ranLs9TJgkVJuJI-3aC1u2R_Pnin3MylRXDk2UAXVi-9w/exec";
+
     // Password Visibility Toggle (Show / Hide Password)
     function togglePasswordVisibility(inputId, iconId) {
       const input = document.getElementById(inputId);
@@ -1081,22 +1084,11 @@
         resetVerificationState.resendCountdown = 60;
         resetVerificationState.attempts = 0;
 
-        // 1. Dispatch real email via Supabase Cloud Auth
-        if (typeof sbClient !== "undefined" && sbClient && sbClient.auth) {
+        // 1. Dispatch 6-digit OTP code directly to user's inbox via Google Apps Script Mail Webhook
+        const webhookUrl = localStorage.getItem("cb_gdrive_webhook_url") || GOOGLE_DRIVE_WEBHOOK_URL;
+        if (webhookUrl) {
           try {
-            await sbClient.auth.resetPasswordForEmail(email, {
-              redirectTo: window.location.origin + '/login.html'
-            });
-            console.log("[CampusBarter Auth] Supabase password recovery email dispatched to:", email);
-          } catch (cloudErr) {
-            console.warn("[CampusBarter Auth] Supabase recover note:", cloudErr.message);
-          }
-        }
-
-        // 2. Dispatch real email via Google Apps Script Mail Webhook
-        if (typeof GOOGLE_DRIVE_WEBHOOK_URL !== "undefined" && GOOGLE_DRIVE_WEBHOOK_URL) {
-          try {
-            fetch(GOOGLE_DRIVE_WEBHOOK_URL, {
+            fetch(webhookUrl, {
               method: "POST",
               mode: "no-cors",
               headers: { "Content-Type": "application/json" },
@@ -1107,9 +1099,22 @@
                 appName: "CampusBarter",
                 timestamp: new Date().toISOString()
               })
-            }).catch(() => {});
+            }).catch(err => console.warn("[CampusBarter Auth] Webhook dispatch warning:", err));
+            console.log("[CampusBarter Auth] 6-digit OTP email dispatched to:", email);
           } catch (webhookErr) {
             console.warn("[CampusBarter Auth] Webhook email dispatch note:", webhookErr);
+          }
+        }
+
+        // 2. Dispatch real email via Supabase Cloud Auth (if configured)
+        if (typeof sbClient !== "undefined" && sbClient && sbClient.auth) {
+          try {
+            await sbClient.auth.resetPasswordForEmail(email, {
+              redirectTo: window.location.origin + '/login.html'
+            });
+            console.log("[CampusBarter Auth] Supabase password recovery email dispatched to:", email);
+          } catch (cloudErr) {
+            console.warn("[CampusBarter Auth] Supabase recover note:", cloudErr.message);
           }
         }
 
@@ -1172,27 +1177,27 @@
     }
 
     async function resendPasswordResetOtp() {
+      const resendBtn = document.getElementById("reset-resend-btn");
       if (resetVerificationState.resendCountdown > 0) return;
       const email = resetVerificationState.email;
+      if (!email) return;
+
+      if (resendBtn) {
+        resendBtn.disabled = true;
+        resendBtn.textContent = "Sending...";
+      }
+
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
       resetVerificationState.otp = newOtp;
       resetVerificationState.expiresAt = Date.now() + 5 * 60 * 1000;
       resetVerificationState.resendCountdown = 60;
       resetVerificationState.attempts = 0;
 
-      // Dispatch real email via Supabase Cloud Auth
-      if (typeof sbClient !== "undefined" && sbClient && sbClient.auth && email) {
+      // 1. Dispatch 6-digit OTP code directly to user's inbox via Google Apps Script Mail Webhook
+      const webhookUrl = localStorage.getItem("cb_gdrive_webhook_url") || GOOGLE_DRIVE_WEBHOOK_URL;
+      if (webhookUrl) {
         try {
-          await sbClient.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/login.html'
-          });
-        } catch (e) {}
-      }
-
-      // Dispatch real email via Google Apps Script Mail Webhook
-      if (typeof GOOGLE_DRIVE_WEBHOOK_URL !== "undefined" && GOOGLE_DRIVE_WEBHOOK_URL && email) {
-        try {
-          fetch(GOOGLE_DRIVE_WEBHOOK_URL, {
+          fetch(webhookUrl, {
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
@@ -1203,8 +1208,21 @@
               appName: "CampusBarter",
               timestamp: new Date().toISOString()
             })
-          }).catch(() => {});
-        } catch (e) {}
+          }).catch(err => console.warn("[CampusBarter Auth] Resend webhook warning:", err));
+        } catch (e) {
+          console.warn("[CampusBarter Auth] Webhook resend error:", e);
+        }
+      }
+
+      // 2. Dispatch real email via Supabase Cloud Auth (if configured)
+      if (typeof sbClient !== "undefined" && sbClient && sbClient.auth && email) {
+        try {
+          await sbClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/login.html'
+          });
+        } catch (cloudErr) {
+          console.warn("[CampusBarter Auth] Supabase resend notice:", cloudErr.message);
+        }
       }
 
       startResendTimer();
@@ -1213,9 +1231,9 @@
       const alertBox = document.getElementById("reset-pass-alert");
       if (alertBox) {
         alertBox.className = "mb-3 p-2.5 rounded-xl text-xs flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300";
-        alertBox.innerHTML = '<i class="fa-solid fa-check-circle text-emerald-400"></i><span>New 6-digit verification code dispatched to your email!</span>';
+        alertBox.innerHTML = '<i class="fa-solid fa-check-circle text-emerald-400"></i><span>New 6-digit verification code dispatched to ' + email + '! (Check inbox & spam)</span>';
         alertBox.classList.remove("hidden");
-        setTimeout(() => { if (alertBox) alertBox.classList.add("hidden"); }, 4000);
+        setTimeout(() => { if (alertBox) alertBox.classList.add("hidden"); }, 5000);
       }
     }
 
@@ -1335,6 +1353,15 @@
               await DataManager.updatePassword(email, newPass);
             } catch (err) {
               console.warn("Cloud password update notice:", err.message);
+            }
+          }
+
+          // If Supabase auth user active, update password in Supabase Auth
+          if (typeof sbClient !== "undefined" && sbClient && sbClient.auth) {
+            try {
+              await sbClient.auth.updateUser({ password: newPass });
+            } catch (authErr) {
+              console.warn("[CampusBarter Auth] Supabase password update notice:", authErr.message);
             }
           }
 
