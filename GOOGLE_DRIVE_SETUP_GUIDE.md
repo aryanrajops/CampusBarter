@@ -46,6 +46,7 @@ function doPost(e) {
       if (recipient && otpCode) {
         MailApp.sendEmail({
           to: recipient,
+          name: "CampusBarter",
           subject: "CampusBarter - Your 6-Digit Password Reset Code",
           htmlBody: "<div style='font-family:sans-serif; max-width:480px; padding:24px; background:#0f172a; color:#f8fafc; border-radius:16px; border:1px solid rgba(255,255,255,0.1);'>" +
             "<h2 style='color:#818cf8; margin-top:0;'>CampusBarter Security</h2>" +
@@ -91,7 +92,13 @@ function doPost(e) {
     }
 
     // 3. Decode base64 data and create the PDF file
-    var base64Content = fileData.indexOf(',') > -1 ? fileData.split(',')[1] : fileData;
+    if (!fileData) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: "Missing fileData payload"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    var base64Content = (typeof fileData === "string" && fileData.indexOf(',') > -1) ? fileData.split(',')[1] : fileData;
     var decoded = Utilities.base64Decode(base64Content);
     var blob = Utilities.newBlob(decoded, "application/pdf", fileName);
     var file = targetFolder.createFile(blob);
@@ -122,6 +129,13 @@ function doGet(e) {
     status: "active",
     service: "CampusBarter Google Drive Auto-Uploader is running!"
   })).setMimeType(ContentService.MimeType.JSON);
+}
+
+// Run this function once by clicking 'Run' (▶️) to grant email sending permissions!
+function testAuth() {
+  var myEmail = Session.getActiveUser().getEmail();
+  MailApp.sendEmail(myEmail, "CampusBarter - Authorization Test", "Google Apps Script Mail permission is now active!");
+  Logger.log("Authorization successful! Email sent to " + myEmail);
 }
 ```
 
