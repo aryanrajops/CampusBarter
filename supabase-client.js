@@ -495,8 +495,12 @@ const DataManager = {
   },
 
   // ---------------------------------------------------------------------------
-  // SECURE BARTER CREATION (Cloud Supabase Swaps Table)
+  // SECURE BARTER STATE MACHINE & CLOUD SYNCHRONIZATION (Supabase Swaps Table)
   // ---------------------------------------------------------------------------
+  getClient() {
+    return sbClient;
+  },
+
   async createSwap(swapData) {
     if (this.isOnline() && sbClient && isValidUUID(swapData.requester_id) && isValidUUID(swapData.peer_id)) {
       try {
@@ -511,6 +515,7 @@ const DataManager = {
 
         if (error) {
           console.warn("[CampusBarter Backend] Cloud swap creation warning:", error.message);
+          return null;
         }
         return data;
       } catch (e) {
@@ -518,6 +523,72 @@ const DataManager = {
       }
     }
     return null;
+  },
+
+  async getSwaps(userId) {
+    if (this.isOnline() && sbClient && isValidUUID(userId)) {
+      try {
+        const { data, error } = await sbClient
+          .from("swaps")
+          .select("*")
+          .or(`requester_id.eq.${userId},peer_id.eq.${userId}`)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.warn("[CampusBarter Backend] Cloud swaps query warning:", error.message);
+          return [];
+        }
+        return data || [];
+      } catch (err) {
+        console.warn("[CampusBarter Backend] Cloud swaps fetch exception:", err.message);
+        return [];
+      }
+    }
+    return [];
+  },
+
+  async updateSwap(swapId, updates) {
+    if (this.isOnline() && sbClient && isValidUUID(swapId)) {
+      try {
+        const payload = {
+          ...updates,
+          updated_at: new Date().toISOString()
+        };
+        const { data, error } = await sbClient
+          .from("swaps")
+          .update(payload)
+          .eq("id", swapId)
+          .select()
+          .single();
+
+        if (error) {
+          console.warn("[CampusBarter Backend] Cloud swap update warning:", error.message);
+          return null;
+        }
+        return data;
+      } catch (err) {
+        console.warn("[CampusBarter Backend] Cloud swap update exception:", err.message);
+        return null;
+      }
+    }
+    return null;
+  },
+
+  async deleteSwap(swapId) {
+    if (this.isOnline() && sbClient && isValidUUID(swapId)) {
+      try {
+        // First mark CANCELLED to guarantee RLS and audit compliance
+        await sbClient.from("swaps").update({ status: 'CANCELLED', updated_at: new Date().toISOString() }).eq("id", swapId);
+        const { error } = await sbClient.from("swaps").delete().eq("id", swapId);
+        if (error) {
+          console.warn("[CampusBarter Backend] Cloud swap delete notice:", error.message);
+        }
+        return true;
+      } catch (err) {
+        console.warn("[CampusBarter Backend] Cloud swap delete exception:", err.message);
+      }
+    }
+    return false;
   },
 
   // ---------------------------------------------------------------------------

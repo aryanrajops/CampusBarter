@@ -841,6 +841,110 @@ async function syncPeersFromCloud() {
 }
 
 
+// =============================================================================
+// DYNAMIC CLOUD SWAP SYNCHRONIZATION (Supabase Cloud + LocalStorage)
+// Fetches barter proposals across devices so peer requests appear in real-time
+// =============================================================================
+async function syncSwapsFromCloud() {
+  if (typeof DataManager === "undefined" || !DataManager.isOnline() || typeof DataManager.getSwaps !== "function") {
+    return;
+  }
+  if (!STATE.currentUser || !STATE.currentUser.id) {
+    return;
+  }
+
+  try {
+    const cloudSwaps = await DataManager.getSwaps(STATE.currentUser.id);
+    if (!Array.isArray(cloudSwaps)) return;
+
+    let swapsUpdated = false;
+    const currentList = [...STATE.activeSwaps];
+
+    cloudSwaps.forEach(cs => {
+      const existingIdx = currentList.findIndex(s => s.id === cs.id);
+      const isReq = cs.requester_id === STATE.currentUser.id;
+      const otherId = isReq ? cs.peer_id : cs.requester_id;
+      const otherProfile = STATE.peers.find(p => p.id === otherId) || STATE.accounts.find(a => a.id === otherId);
+
+      const mappedSwap = {
+        id: cs.id,
+        userId: cs.requester_id,
+        userName: isReq ? STATE.currentUser.name : (otherProfile ? otherProfile.name : "Student Peer"),
+        userAvatar: isReq ? (STATE.currentUser.avatar || "assets/images/avatar-default.jpg") : (otherProfile ? (otherProfile.avatar || "assets/images/avatar-default.jpg") : "assets/images/avatar-default.jpg"),
+        userEmail: isReq ? (STATE.currentUser.email || "") : (otherProfile ? (otherProfile.email || "") : ""),
+        requester_id: cs.requester_id,
+        peer_id: cs.peer_id,
+        peerId: cs.peer_id,
+        peerName: isReq ? (otherProfile ? otherProfile.name : "Student Peer") : STATE.currentUser.name,
+        peerAvatar: isReq ? (otherProfile ? (otherProfile.avatar || "assets/images/avatar-default.jpg") : "assets/images/avatar-default.jpg") : (STATE.currentUser.avatar || "assets/images/avatar-default.jpg"),
+        peerEmail: isReq ? (otherProfile ? (otherProfile.email || "") : "") : (STATE.currentUser.email || ""),
+        peerDepartment: otherProfile ? otherProfile.department : "Computer Science",
+        peerSemester: otherProfile ? otherProfile.semester : "Sem 4",
+        peerTeaches: cs.peer_teaches,
+        peerLearns: cs.requester_teaches,
+        requester_teaches: cs.requester_teaches,
+        peer_teaches: cs.peer_teaches,
+        status: cs.status,
+        date: cs.session_date || cs.date || null,
+        time: cs.session_time || cs.time || null,
+        location: cs.location || null,
+        notes: cs.notes || "",
+        isAi: otherProfile ? (otherProfile.isAi || false) : false
+      };
+
+      if (cs.status === "CANCELLED") {
+        if (existingIdx !== -1) {
+          currentList.splice(existingIdx, 1);
+          swapsUpdated = true;
+        }
+      } else if (existingIdx !== -1) {
+        const cur = currentList[existingIdx];
+        if (cur.status !== mappedSwap.status || cur.date !== mappedSwap.date || cur.time !== mappedSwap.time || cur.location !== mappedSwap.location) {
+          currentList[existingIdx] = { ...cur, ...mappedSwap };
+          swapsUpdated = true;
+        }
+      } else {
+        currentList.unshift(mappedSwap);
+        swapsUpdated = true;
+      }
+    });
+
+    if (swapsUpdated) {
+      STATE.activeSwaps = currentList;
+      saveStoredSwaps(STATE.activeSwaps);
+      if (typeof renderActiveSwaps === "function") renderActiveSwaps();
+      if (typeof updateSwapCounters === "function") updateSwapCounters();
+      if (typeof updateGlobalStats === "function") updateGlobalStats();
+    }
+  } catch (err) {
+    console.warn("[CampusBarter Backend] Cloud swap sync warning:", err);
+  }
+}
+
+let swapsRealtimeChannel = null;
+function setupSwapsRealtime() {
+  if (swapsRealtimeChannel) return; // Prevent duplicate channels
+  if (typeof DataManager !== "undefined" && typeof DataManager.getClient === "function") {
+    const client = DataManager.getClient();
+    if (client && typeof client.channel === "function") {
+      try {
+        swapsRealtimeChannel = client
+          .channel("campusbarter-swaps-channel")
+          .on("postgres_changes", { event: "*", schema: "public", table: "swaps" }, (payload) => {
+            console.log("[Supabase Realtime] Swaps table changed:", payload.eventType);
+            syncSwapsFromCloud();
+          })
+          .subscribe((status) => {
+            console.log("[Supabase Realtime] Swaps channel connection status:", status);
+          });
+      } catch (e) {
+        console.warn("[Supabase Realtime] Channel setup note:", e.message);
+      }
+    }
+  }
+}
+
+
 const STATE = {
   currentUser: getStoredCurrentUser(),
   accounts: getStoredAccounts(),
@@ -863,6 +967,8 @@ window.getStoredSwaps = getStoredSwaps;
 window.saveStoredSwaps = saveStoredSwaps;
 window.getStoredPeers = getStoredPeers;
 window.syncPeersFromCloud = syncPeersFromCloud;
+window.syncSwapsFromCloud = syncSwapsFromCloud;
+window.setupSwapsRealtime = setupSwapsRealtime;
 
 // =============================================================================
 // AI MOCK IDENTIFIER & REAL USER STATS ENGINE
@@ -878,17 +984,134 @@ function renderAiBadge(isAi, showReal = false) {
   return "";
 }
 
+/**
+ * Resolves the accurate partner profile, roles, and taught/learned skills for a barter swap.
+ * Handles both the Proposer (Requester) and Recipient (Peer) viewpoints correctly:
+ * - Proposer sees: Partner (Recipient) info + "Waiting for peer to accept..."
+ * - Recipient sees: Partner (Proposer) info + "Accept Swap" / "Decline" buttons
+ */
+function resolveSwapDisplay(swap, currentUser) {
+  if (!swap) return {};
+
+  const reqId = swap.userId || swap.requester_id || swap.requesterId;
+  const peerId = swap.peerId || swap.peer_id;
+
+  // Guest / Demo Fallback
+  if (!currentUser) {
+    return {
+      partnerName: swap.peerName || "Peer Student",
+      partnerAvatar: swap.peerAvatar || "assets/images/avatar-default.jpg",
+      partnerDept: swap.peerDepartment || "Computer Science",
+      partnerSem: swap.peerSemester || "Sem 4",
+      isAi: swap.isAi !== undefined ? swap.isAi : true,
+      partnerTeaches: swap.peerTeaches || swap.peer_teaches || "Skills",
+      youTeach: swap.peerLearns || swap.requester_teaches || "Knowledge",
+      isRequester: false
+    };
+  }
+
+  const myId = currentUser.id;
+  const myEmail = (currentUser.email || "").toLowerCase();
+  const reqEmail = (swap.userEmail || "").toLowerCase();
+  const peerEmail = (swap.peerEmail || "").toLowerCase();
+
+  const isRequester = (reqId === myId) || 
+                      (myEmail && reqEmail && myEmail === reqEmail) || 
+                      (swap.userName && currentUser.name && swap.userName.toLowerCase() === currentUser.name.toLowerCase());
+
+  // Determine who the partner is from the current user's perspective
+  const partnerId = isRequester ? peerId : reqId;
+
+  // Find partner in STATE.peers or accounts
+  let partner = null;
+  if (partnerId) {
+    partner = STATE.peers.find(p => p.id === partnerId) || 
+              STATE.accounts.find(a => a.id === partnerId);
+  }
+
+  // Fallback to name search if ID not matched
+  if (!partner) {
+    if (isRequester && swap.peerName) {
+      partner = STATE.peers.find(p => p.name === swap.peerName) || 
+                STATE.accounts.find(a => a.name === swap.peerName);
+    } else if (!isRequester && swap.userName) {
+      partner = STATE.peers.find(p => p.name === swap.userName) || 
+                STATE.accounts.find(a => a.name === swap.userName);
+    }
+  }
+
+  let partnerName = "";
+  let partnerAvatar = "";
+  let partnerDept = "";
+  let partnerSem = "";
+  let isAi = false;
+
+  if (isRequester) {
+    partnerName = partner ? partner.name : (swap.peerName || "Peer Student");
+    partnerAvatar = partner ? (partner.avatar || partner.avatar_url) : (swap.peerAvatar || "assets/images/avatar-default.jpg");
+    partnerDept = partner ? partner.department : (swap.peerDepartment || "Campus Student");
+    partnerSem = partner ? partner.semester : (swap.peerSemester || "Sem 1");
+    isAi = partner ? (partner.isAi || false) : (swap.isAi || false);
+  } else {
+    partnerName = partner ? partner.name : (swap.userName || "Peer Student");
+    partnerAvatar = partner ? (partner.avatar || partner.avatar_url) : (swap.userAvatar || "assets/images/avatar-default.jpg");
+    partnerDept = partner ? partner.department : "Campus Student";
+    partnerSem = partner ? partner.semester : "Sem 1";
+    isAi = partner ? (partner.isAi || false) : false;
+  }
+
+  if (!partnerAvatar || partnerAvatar.includes("undefined") || partnerAvatar.includes("null")) {
+    partnerAvatar = "assets/images/avatar-default.jpg";
+  }
+
+  let partnerTeaches = "";
+  let youTeach = "";
+
+  if (isRequester) {
+    partnerTeaches = swap.peerTeaches || swap.peer_teaches || "Skills";
+    youTeach = swap.peerLearns || swap.requester_teaches || "Knowledge";
+  } else {
+    partnerTeaches = swap.requester_teaches || swap.peerLearns || "Skills";
+    youTeach = swap.peer_teaches || swap.peerTeaches || "Knowledge";
+  }
+
+  return {
+    partnerName,
+    partnerAvatar,
+    partnerDept,
+    partnerSem,
+    isAi,
+    partnerTeaches,
+    youTeach,
+    isRequester
+  };
+}
+
 function getUserActiveSwaps() {
   if (!STATE.currentUser) {
     // When visiting as a guest, display mock seed swaps so visitors can explore the 4-phase state machine
-    return STATE.activeSwaps;
+    return STATE.activeSwaps.filter(s => s.status !== "CANCELLED");
   }
   // If current logged-in account is AI Aarav Patel (usr-1, the pre-seeded demo user), show his 4 demo swaps
   if (STATE.currentUser.id === "usr-1") {
-    return STATE.activeSwaps.filter(s => !s.userId || s.userId === "usr-1" || s.peerId === "usr-1");
+    return STATE.activeSwaps.filter(s => {
+      if (s.status === "CANCELLED") return false;
+      const uId = s.userId || s.requester_id || s.requesterId;
+      const pId = s.peerId || s.peer_id;
+      return !uId || uId === "usr-1" || pId === "usr-1";
+    });
   }
-  // For any REAL user, strictly display ONLY their own swaps (starts at empty 0)
-  return STATE.activeSwaps.filter(s => s.userId === STATE.currentUser.id || s.peerId === STATE.currentUser.id);
+  // For any REAL user, strictly display ONLY their own swaps (proposals sent or received)
+  const currId = STATE.currentUser.id;
+  const currEmail = (STATE.currentUser.email || "").toLowerCase();
+  return STATE.activeSwaps.filter(s => {
+    if (s.status === "CANCELLED") return false;
+    const uId = s.userId || s.requester_id || s.requesterId;
+    const pId = s.peerId || s.peer_id;
+    const uEmail = (s.userEmail || "").toLowerCase();
+    const pEmail = (s.peerEmail || "").toLowerCase();
+    return uId === currId || pId === currId || (currEmail && (uEmail === currEmail || pEmail === currEmail));
+  });
 }
 
 function updateGlobalStats() {
@@ -1801,27 +2024,56 @@ async function acceptSwap(swapId, btn = null) {
   saveStoredSwaps(STATE.activeSwaps);
   renderActiveSwaps();
   updateSwapCounters();
+
+  // Cloud synchronization with Supabase
+  if (typeof DataManager !== "undefined" && typeof DataManager.updateSwap === "function") {
+    DataManager.updateSwap(swap.id, { status: "ACCEPTED" }).catch(err => {
+      console.warn("[CampusBarter Backend] Cloud swap accept note:", err.message);
+    });
+  }
+
   if (window.SoundFX) SoundFX.playSuccess();
-  showToast(`Accepted swap with ${escapeHTML(swap.peerName)}! Schedule a session now.`, "success", "fa-circle-check");
+  const display = resolveSwapDisplay(swap, STATE.currentUser);
+  showToast(`Accepted swap with ${escapeHTML(display.partnerName)}! Schedule a session now.`, "success", "fa-circle-check");
 }
 
 async function declineSwap(swapId, btn = null) {
   const index = STATE.activeSwaps.findIndex(s => s.id === swapId);
   if (index === -1) return;
 
+  const swap = STATE.activeSwaps[index];
+  const display = resolveSwapDisplay(swap, STATE.currentUser);
+
   if (btn) {
     btn.classList.add("btn-mini-loading");
     btn.disabled = true;
-    btn.innerHTML = `${createKineticSpinner(true)} <span>Declining...</span>`;
+    btn.innerHTML = `${createKineticSpinner(true)} <span>${display.isRequester ? 'Cancelling...' : 'Declining...'}</span>`;
     await new Promise(r => setTimeout(r, 300));
   }
 
-  const name = STATE.activeSwaps[index].peerName;
+  // Remove from active list
   STATE.activeSwaps.splice(index, 1);
   saveStoredSwaps(STATE.activeSwaps);
   renderActiveSwaps();
   updateSwapCounters();
-  showToast(`Declined barter proposal from ${escapeHTML(name)}`, "info", "fa-circle-xmark");
+
+  // Cloud synchronization with Supabase
+  if (typeof DataManager !== "undefined") {
+    if (typeof DataManager.deleteSwap === "function") {
+      DataManager.deleteSwap(swapId).catch(err => {
+        console.warn("[CampusBarter Backend] Cloud swap delete note:", err.message);
+      });
+    } else if (typeof DataManager.updateSwap === "function") {
+      DataManager.updateSwap(swapId, { status: "CANCELLED" }).catch(err => {
+        console.warn("[CampusBarter Backend] Cloud swap cancel note:", err.message);
+      });
+    }
+  }
+
+  const msg = display.isRequester 
+    ? `Barter proposal to ${escapeHTML(display.partnerName)} cancelled.` 
+    : `Declined barter proposal from ${escapeHTML(display.partnerName)}.`;
+  showToast(msg, "info", "fa-circle-xmark");
 }
 
 function openScheduleModal(swapId) {
@@ -1832,15 +2084,17 @@ function openScheduleModal(swapId) {
   const summary = document.getElementById("modal-swap-summary");
   if (!modal) return;
 
+  const display = resolveSwapDisplay(swap, STATE.currentUser);
+
   if (swapIdInput) swapIdInput.value = swap.id;
   if (summary) {
     summary.innerHTML = `
       <div class="flex items-center gap-3">
-        <img src="${swap.peerAvatar || 'assets/images/avatar-default.jpg'}" class="w-10 h-10 rounded-xl object-cover border border-white/20">
+        <img src="${display.partnerAvatar || 'assets/images/avatar-default.jpg'}" class="w-10 h-10 rounded-xl object-cover border border-white/20">
         <div>
-          <p class="text-sm font-bold text-white">${escapeHTML(swap.peerName)}</p>
-          <p class="text-xs text-slate-300">Teaching: <span class="text-emerald-400 font-semibold">${escapeHTML(swap.peerTeaches)}</span></p>
-          <p class="text-xs text-slate-300">Learning: <span class="text-indigo-400 font-semibold">${escapeHTML(swap.peerLearns)}</span></p>
+          <p class="text-sm font-bold text-white">${escapeHTML(display.partnerName)}</p>
+          <p class="text-xs text-slate-300">Teaching: <span class="text-emerald-400 font-semibold">${escapeHTML(display.partnerTeaches)}</span></p>
+          <p class="text-xs text-slate-300">Learning: <span class="text-indigo-400 font-semibold">${escapeHTML(display.youTeach)}</span></p>
         </div>
       </div>
     `;
@@ -1899,12 +2153,13 @@ async function completeSwap(swapId, btn = null) {
     }
   }
 
+  const display = resolveSwapDisplay(swap, STATE.currentUser);
   renderNavbarAuth();
   renderActiveSwaps();
   renderPeerProfiles();
   updateSwapCounters();
   updateGlobalStats();
-  showToast(`Barter Completed! 🎉 +50 Karma to ${STATE.currentUser ? escapeHTML(STATE.currentUser.name) : 'You'} and +50 Karma to ${escapeHTML(swap.peerName)}!`, "success", "fa-gift");
+  showToast(`Barter Completed! 🎉 +50 Karma to ${STATE.currentUser ? escapeHTML(STATE.currentUser.name) : 'You'} and +50 Karma to ${escapeHTML(display.partnerName)}!`, "success", "fa-gift");
 }
 
 function renderActiveSwaps() {
@@ -1926,6 +2181,8 @@ function renderActiveSwaps() {
   if (emptyState) emptyState.classList.add("hidden");
 
   container.innerHTML = filteredSwaps.map(swap => {
+    const display = resolveSwapDisplay(swap, STATE.currentUser);
+    const partnerFirstName = (display.partnerName || 'Peer').split(" ")[0];
     const stepperHtml = generateStepperHTML(swap.status);
     const statusPills = {
       PENDING: '<span class="status-pill-pending"><i class="fa-solid fa-hourglass-half"></i><span>Pending</span></span>',
@@ -1936,14 +2193,30 @@ function renderActiveSwaps() {
 
     let actionButtonsHtml = "";
     if (swap.status === "PENDING") {
-      actionButtonsHtml = `
-        <div class="flex items-center gap-2 pt-2">
-          <button onclick="acceptSwap('${swap.id}', this)" class="btn-emerald text-xs py-2 px-3 rounded-xl font-medium flex-1 flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-check"></i> Accept Swap
-          </button>
-          <button onclick="declineSwap('${swap.id}', this)" class="btn-glass text-xs py-2 px-3 rounded-xl font-medium text-slate-300 hover:text-rose-400">Decline</button>
-        </div>
-      `;
+      if (display.isRequester) {
+        // Current user proposed this swap -> Waiting for peer to accept
+        actionButtonsHtml = `
+          <div class="flex items-center justify-between gap-2 pt-2">
+            <div class="flex items-center gap-2 text-xs text-amber-400 font-medium py-2 px-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex-1 min-w-0">
+              <i class="fa-solid fa-clock-rotate-left animate-spin text-[11px] shrink-0" style="animation-duration: 4s;"></i>
+              <span class="truncate">Waiting for ${escapeHTML(partnerFirstName)} to accept...</span>
+            </div>
+            <button onclick="declineSwap('${swap.id}', this)" class="btn-glass text-xs py-2 px-3 rounded-xl font-medium text-slate-400 hover:text-rose-400 shrink-0 transition-colors" title="Cancel this barter proposal">
+              <i class="fa-solid fa-xmark mr-1"></i>Cancel
+            </button>
+          </div>
+        `;
+      } else {
+        // Current user received this swap -> Can Accept or Decline
+        actionButtonsHtml = `
+          <div class="flex items-center gap-2 pt-2">
+            <button onclick="acceptSwap('${swap.id}', this)" class="btn-emerald text-xs py-2 px-3 rounded-xl font-medium flex-1 flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20">
+              <i class="fa-solid fa-check"></i> Accept Swap
+            </button>
+            <button onclick="declineSwap('${swap.id}', this)" class="btn-glass text-xs py-2 px-3 rounded-xl font-medium text-slate-300 hover:text-rose-400">Decline</button>
+          </div>
+        `;
+      }
     } else if (swap.status === "ACCEPTED") {
       actionButtonsHtml = `
         <div class="pt-2">
@@ -1953,13 +2226,17 @@ function renderActiveSwaps() {
         </div>
       `;
     } else if (swap.status === "SCHEDULED") {
+      const displayDate = swap.date || swap.session_date || "Date TBD";
+      const displayTime = swap.time || swap.session_time || "Time TBD";
+      const displayLocation = swap.location || "Campus Discussion Area";
+
       actionButtonsHtml = `
         <div class="flex flex-col gap-2 pt-2">
           <div class="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-start gap-2.5">
             <i class="fa-solid fa-clock text-purple-400 text-xs mt-0.5"></i>
             <div class="text-xs">
-              <p class="font-bold text-white">${escapeHTML(swap.date)} @ ${escapeHTML(swap.time)}</p>
-              <p class="text-purple-300 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> ${escapeHTML(swap.location)}</p>
+              <p class="font-bold text-white">${escapeHTML(displayDate)} @ ${escapeHTML(displayTime)}</p>
+              <p class="text-purple-300 mt-0.5"><i class="fa-solid fa-location-dot mr-1"></i> ${escapeHTML(displayLocation)}</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -1985,25 +2262,25 @@ function renderActiveSwaps() {
         <div>
           <div class="flex items-start justify-between gap-2.5 mb-3.5">
             <div class="flex items-center gap-2.5 min-w-0 flex-1">
-              <img src="${swap.peerAvatar}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-white/20 shrink-0" alt="${escapeHTML(swap.peerName)}">
+              <img src="${display.partnerAvatar}" class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-white/20 shrink-0" alt="${escapeHTML(display.partnerName)}">
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5 flex-wrap">
-                  <h4 class="text-xs sm:text-sm font-bold text-white truncate max-w-[110px] xs:max-w-[140px] sm:max-w-none" title="${escapeHTML(swap.peerName || 'Peer')}">${escapeHTML(swap.peerName || 'Peer')}</h4>
-                  ${renderAiBadge(swap.isAi)}
+                  <h4 class="text-xs sm:text-sm font-bold text-white truncate max-w-[110px] xs:max-w-[140px] sm:max-w-none" title="${escapeHTML(display.partnerName || 'Peer')}">${escapeHTML(display.partnerName || 'Peer')}</h4>
+                  ${renderAiBadge(display.isAi)}
                 </div>
-                <p class="text-[11px] sm:text-xs text-slate-400 truncate">${escapeHTML(swap.peerDepartment || 'Campus Student')} • ${escapeHTML(swap.peerSemester || 'Sem 1')}</p>
+                <p class="text-[11px] sm:text-xs text-slate-400 truncate">${escapeHTML(display.partnerDept || 'Campus Student')} • ${escapeHTML(display.partnerSem || 'Sem 1')}</p>
               </div>
             </div>
-            <div class="shrink-0 pt-0.5">${statusPills[swap.status]}</div>
+            <div class="shrink-0 pt-0.5">${statusPills[swap.status] || ''}</div>
           </div>
           <div class="space-y-2 mb-4 p-3 rounded-xl bg-white/5 border border-white/10">
             <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-chalkboard-user text-emerald-400 shrink-0"></i> <span class="truncate">${escapeHTML((swap.peerName || 'Peer').split(" ")[0])} Teaches:</span></span>
-              <span class="font-semibold text-emerald-300 ml-2 text-right truncate">${escapeHTML(swap.peerTeaches || 'Skills')}</span>
+              <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-chalkboard-user text-emerald-400 shrink-0"></i> <span class="truncate">${escapeHTML(partnerFirstName)} Teaches:</span></span>
+              <span class="font-semibold text-emerald-300 ml-2 text-right truncate">${escapeHTML(display.partnerTeaches || 'Skills')}</span>
             </div>
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-400 flex items-center gap-1.5 truncate"><i class="fa-solid fa-graduation-cap text-indigo-400 shrink-0"></i> <span class="truncate">You Teach:</span></span>
-              <span class="font-semibold text-indigo-300 ml-2 text-right truncate">${escapeHTML(swap.peerLearns || 'Knowledge')}</span>
+              <span class="font-semibold text-indigo-300 ml-2 text-right truncate">${escapeHTML(display.youTeach || 'Knowledge')}</span>
             </div>
           </div>
           <div class="my-4">${stepperHtml}</div>
@@ -2554,20 +2831,42 @@ function setupModalForms() {
 
       showEnergyBeam(proposeForm);
       setButtonLoading(submitBtn, true, "Sending Proposal...");
-      await new Promise(r => setTimeout(r, 450));
+
+      // Synchronize barter proposal into Supabase Cloud Swaps
+      let cloudSwap = null;
+      if (typeof DataManager !== "undefined" && typeof DataManager.createSwap === "function" && STATE.currentUser) {
+        try {
+          cloudSwap = await DataManager.createSwap({
+            requester_id: STATE.currentUser.id,
+            peer_id: peer.id,
+            requester_teaches: teachSkill,
+            peer_teaches: learnSkill,
+            notes: pitch
+          });
+        } catch (err) {
+          console.warn("[CampusBarter Backend] Cloud swap sync warning:", err);
+        }
+      }
 
       const newSwap = {
-        id: `swp-${Date.now()}`,
+        id: (cloudSwap && cloudSwap.id) ? cloudSwap.id : `swp-${Date.now()}`,
         userId: STATE.currentUser ? STATE.currentUser.id : "usr-guest",
         userName: STATE.currentUser ? STATE.currentUser.name : "You",
+        userAvatar: STATE.currentUser ? (STATE.currentUser.avatar || "assets/images/avatar-default.jpg") : "assets/images/avatar-default.jpg",
+        userEmail: STATE.currentUser ? STATE.currentUser.email : "",
+        requester_id: STATE.currentUser ? STATE.currentUser.id : null,
+        peer_id: peer.id,
         peerId: peer.id,
         peerName: peer.name,
+        peerEmail: peer.email || "",
         isAi: peer.isAi || false,
         peerAvatar: peer.avatar || "assets/images/avatar-default.jpg",
         peerDepartment: peer.department || "General Studies",
         peerSemester: peer.semester || "Semester 1",
         peerTeaches: learnSkill,
         peerLearns: teachSkill,
+        requester_teaches: teachSkill,
+        peer_teaches: learnSkill,
         status: "PENDING",
         date: null,
         time: null,
@@ -2580,17 +2879,6 @@ function setupModalForms() {
       renderActiveSwaps();
       updateSwapCounters();
       updateGlobalStats();
-
-      // Synchronize barter proposal into Supabase Cloud Swaps
-      if (typeof DataManager !== "undefined" && typeof DataManager.createSwap === "function" && STATE.currentUser) {
-        DataManager.createSwap({
-          requester_id: STATE.currentUser.id,
-          peer_id: peer.id,
-          requester_teaches: teachSkill,
-          peer_teaches: learnSkill,
-          notes: pitch
-        }).catch(err => console.warn("[CampusBarter Backend] Cloud swap sync warning:", err));
-      }
 
       hideEnergyBeam(proposeForm);
       setButtonLoading(submitBtn, false);
@@ -2668,12 +2956,26 @@ function setupModalForms() {
       renderActiveSwaps();
       updateSwapCounters();
 
+      // Cloud synchronization with Supabase
+      if (typeof DataManager !== "undefined" && typeof DataManager.updateSwap === "function") {
+        DataManager.updateSwap(swap.id, {
+          status: "SCHEDULED",
+          session_date: date,
+          session_time: time,
+          location: location,
+          notes: notes || swap.notes || ""
+        }).catch(err => {
+          console.warn("[CampusBarter Backend] Cloud schedule sync note:", err.message);
+        });
+      }
+
       hideEnergyBeam(scheduleForm);
       setButtonLoading(submitBtn, false);
       document.getElementById("schedule-modal").classList.add("hidden");
       scheduleForm.reset();
       if (window.SoundFX) SoundFX.playSuccess();
-      showToast(`Meeting scheduled with ${escapeHTML(swap.peerName)} for ${escapeHTML(date)}!`, "success", "fa-calendar-check");
+      const schedDisplay = resolveSwapDisplay(swap, STATE.currentUser);
+      showToast(`Meeting scheduled with ${escapeHTML(schedDisplay.partnerName)} for ${escapeHTML(date)}!`, "success", "fa-calendar-check");
     });
   }
 
@@ -3880,14 +4182,32 @@ function initApp() {
 
   // 6. Asynchronous Real Peer & Cloud Sync (Fetches all registered students)
   try { syncPeersFromCloud(); } catch (e) { console.warn("[Cloud Peer Sync]", e); }
+
+  // 7. Asynchronous Real Swaps Cloud Sync & Realtime Channel
+  try { 
+    syncSwapsFromCloud(); 
+    setupSwapsRealtime(); 
+  } catch (e) { 
+    console.warn("[Cloud Swap Sync]", e); 
+  }
 }
 
-// Automatically refresh real peer profiles when student returns to tab
+// Automatically refresh real peer profiles and barter proposals when student returns to tab
 window.addEventListener("focus", () => {
   if (typeof syncPeersFromCloud === "function") {
     syncPeersFromCloud();
   }
+  if (typeof syncSwapsFromCloud === "function") {
+    syncSwapsFromCloud();
+  }
 });
+
+// Periodic background heartbeat to synchronize barter proposals across student devices every 7 seconds
+setInterval(() => {
+  if (typeof syncSwapsFromCloud === "function" && STATE.currentUser) {
+    syncSwapsFromCloud();
+  }
+}, 7000);
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initApp);

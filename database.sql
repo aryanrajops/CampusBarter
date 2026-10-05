@@ -164,6 +164,11 @@ CREATE POLICY "Participants can update their swaps"
 ON public.swaps FOR UPDATE 
 USING (auth.uid() = requester_id OR auth.uid() = peer_id);
 
+-- Participating users can cancel or delete swaps
+CREATE POLICY "Participants can delete their swaps" 
+ON public.swaps FOR DELETE 
+USING (auth.uid() = requester_id OR auth.uid() = peer_id);
+
 -- --- PYQ Repository RLS ---
 -- Anyone authenticated can view and search exam papers
 CREATE POLICY "PYQs are viewable by authenticated users" 
