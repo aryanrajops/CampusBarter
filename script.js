@@ -1,4 +1,4 @@
-﻿/**
+/**
  * CampusBarter - Frontend Logic, Auth System & Peer Barter Engine
  * Vanilla JavaScript with Supabase Cloud Database + LocalStorage State Persistence
  */
@@ -760,26 +760,26 @@ async function syncPeersFromCloud() {
       const resolved = resolveCollegiateSkills(cp);
 
       if (existingIdx !== -1) {
-        // Prioritize real user skills:
+        // REAL-TIME FIX: Always trust cloud data over local cache.
+        // Cloud is the source of truth — if a student edits their profile/skills
+        // on any device, those changes must propagate here immediately.
         const isGenericSkill = (s) => !s || typeof s !== "string" || [
           "general studies", "general", "advanced coding", "skill exchange", "peer academic barter", "n/a", "none", "null", "undefined"
         ].includes(s.trim().toLowerCase());
 
+        // Cloud skills win if they're real (non-generic); only fall back to local if cloud has nothing
+        const cloudTeach = resolved.teach;
+        const cloudLearn = resolved.learn;
         const localTeach = accounts[existingIdx].teachSkills;
         const localLearn = accounts[existingIdx].learnSkills;
-        let finalTeach = resolved.teach;
-        let finalLearn = resolved.learn;
 
-        if (localTeach && localTeach.length && !localTeach.some(isGenericSkill)) {
-          if (!cp.teachSkills || !cp.teachSkills.length || cp.teachSkills.some(isGenericSkill)) {
-            finalTeach = localTeach;
-          }
-        }
-        if (localLearn && localLearn.length && !localLearn.some(isGenericSkill)) {
-          if (!cp.learnSkills || !cp.learnSkills.length || cp.learnSkills.some(isGenericSkill)) {
-            finalLearn = localLearn;
-          }
-        }
+        const finalTeach = (cloudTeach && cloudTeach.length && !cloudTeach.every(isGenericSkill))
+          ? cloudTeach  // Cloud has real skills → use them (covers real-time updates)
+          : (localTeach && localTeach.length ? localTeach : cloudTeach); // Fallback to local only if cloud is empty
+
+        const finalLearn = (cloudLearn && cloudLearn.length && !cloudLearn.every(isGenericSkill))
+          ? cloudLearn
+          : (localLearn && localLearn.length ? localLearn : cloudLearn);
 
         // Merge cloud updates into local account cache
         accounts[existingIdx] = {
@@ -946,37 +946,14 @@ function setupSwapsRealtime() {
   }
 }
 
-
-const STATE = {
-  currentUser: getStoredCurrentUser(),
-  accounts: getStoredAccounts(),
-  currentSwapFilter: "ALL",
-  currentDeptFilter: "ALL",
-  pyqs: getStoredPYQs(),
-  activeSwaps: getStoredSwaps(),
-  peers: getStoredPeers()
-};
-
-// Expose state and storage engines to global window
-window.STATE = STATE;
-window.getStoredAccounts = getStoredAccounts;
-window.saveStoredAccounts = saveStoredAccounts;
-window.getStoredCurrentUser = getStoredCurrentUser;
-window.setStoredCurrentUser = setStoredCurrentUser;
-window.getStoredPYQs = getStoredPYQs;
-window.saveStoredPYQs = saveStoredPYQs;
-window.getStoredSwaps = getStoredSwaps;
-window.saveStoredSwaps = saveStoredSwaps;
-window.getStoredPeers = getStoredPeers;
-window.syncPeersFromCloud = syncPeersFromCloud;
-window.syncSwapsFromCloud = syncSwapsFromCloud;
-window.setupSwapsRealtime = setupSwapsRealtime;
-
 // ---------------------------------------------------------------------------
 // PROFILES REALTIME — Live Karma & Skills updates across all devices
+// Listens to the Supabase `profiles` table so when any student's karma
+// changes (e.g. after a swap completes) every open browser sees the new
+// value within seconds without a page refresh.
 // ---------------------------------------------------------------------------
 function setupProfilesRealtime() {
-  if (profilesRealtimeChannel) return;
+  if (profilesRealtimeChannel) return; // Prevent duplicate channels
   if (typeof DataManager === "undefined" || typeof DataManager.getClient !== "function") return;
 
   const client = DataManager.getClient();
@@ -996,7 +973,9 @@ function setupProfilesRealtime() {
 
         console.log("[Supabase Realtime] Profile updated:", updated.name || updated.id, "karma:", updated.karma);
 
+        // Silently refresh peer list with new karma/skills data
         syncPeersFromCloud().then(() => {
+          // If karma actually changed, show a subtle live indicator to the viewer
           if (
             typeof prev?.karma === "number" &&
             typeof updated.karma === "number" &&
@@ -1024,7 +1003,34 @@ function setupProfilesRealtime() {
     console.warn("[Supabase Realtime] Profiles channel setup note:", e.message);
   }
 }
+
 window.setupProfilesRealtime = setupProfilesRealtime;
+
+
+const STATE = {
+  currentUser: getStoredCurrentUser(),
+  accounts: getStoredAccounts(),
+  currentSwapFilter: "ALL",
+  currentDeptFilter: "ALL",
+  pyqs: getStoredPYQs(),
+  activeSwaps: getStoredSwaps(),
+  peers: getStoredPeers()
+};
+
+// Expose state and storage engines to global window
+window.STATE = STATE;
+window.getStoredAccounts = getStoredAccounts;
+window.saveStoredAccounts = saveStoredAccounts;
+window.getStoredCurrentUser = getStoredCurrentUser;
+window.setStoredCurrentUser = setStoredCurrentUser;
+window.getStoredPYQs = getStoredPYQs;
+window.saveStoredPYQs = saveStoredPYQs;
+window.getStoredSwaps = getStoredSwaps;
+window.saveStoredSwaps = saveStoredSwaps;
+window.getStoredPeers = getStoredPeers;
+window.syncPeersFromCloud = syncPeersFromCloud;
+window.syncSwapsFromCloud = syncSwapsFromCloud;
+window.setupSwapsRealtime = setupSwapsRealtime;
 
 // =============================================================================
 // AI MOCK IDENTIFIER & REAL USER STATS ENGINE
@@ -3230,39 +3236,30 @@ function setupModalForms() {
         const cleanSem = semester.toLowerCase().replace(/[^a-z0-9]/g, "");
         const cleanExam = examType.toLowerCase().replace(/[^a-z0-9]/g, "");
 
+        // MULTI-PDF FIX: Only block truly identical files (same filename).
+        // Multiple PDFs for the same subject/year/exam are now ALLOWED
+        // (e.g., CAT 2024 Paper 1 + CAT 2024 Paper 2 can both be uploaded).
         const existingDuplicate = (STATE.pyqs || []).find(p => {
-          const pCode = (p.code || "").toUpperCase().replace(/[\s-_]/g, "");
-          const pSubj = (p.subject || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-          const pSem = (p.semester || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-          const pExam = (p.examType || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-          const pYear = parseInt(p.year, 10);
+          // Only block if the exact same file is uploaded again (same filename)
+          const isSameFileName = currentSelectedFile && p.fileName &&
+            p.fileName.toLowerCase() === currentSelectedFile.name.toLowerCase();
 
-          // Academic match: Same course code OR same subject name
-          const isSameCourse = (cleanCode && pCode && cleanCode === pCode) ||
-                               (cleanSubject && pSubj && (cleanSubject === pSubj || cleanSubject.includes(pSubj) || pSubj.includes(cleanSubject)));
+          // Also block exact same Drive URL (prevent link farming)
+          const isSameDriveUrl = driveUrl && p.driveUrl &&
+            p.driveUrl.trim().toLowerCase() === driveUrl.trim().toLowerCase();
 
-          // Exam context match: Same exam type (CIA-1, CIA-2, Semester End) + same year + same semester
-          const isSameExam = cleanExam === pExam;
-          const isSameYear = pYear === year;
-          const isSameSem = cleanSem === pSem;
-
-          // File name match (if local file selected and existing record has fileName)
-          const isSameFileName = currentSelectedFile && p.fileName && p.fileName.toLowerCase() === currentSelectedFile.name.toLowerCase();
-
-          return (isSameCourse && isSameExam && isSameYear && isSameSem) || isSameFileName;
+          return isSameFileName || isSameDriveUrl;
         });
 
         if (existingDuplicate) {
           hasError = true;
-          const dupLabel = `${existingDuplicate.subject} (${existingDuplicate.code}) • ${existingDuplicate.semester} • ${existingDuplicate.examType} ${existingDuplicate.year}`;
-          showFieldError(codeInput, "Duplicate paper! This exam already exists in the Academic Vault.");
-          showFieldError(subjectInput, "Paper already archived in vault.");
+          const dupLabel = `${existingDuplicate.subject} (${existingDuplicate.code})`;
+          showFieldError(codeInput, "This exact file is already in the Academic Vault.");
           if (!firstErrorField) firstErrorField = codeInput;
 
           if (window.SoundFX) SoundFX.playError();
-          showToast(`Duplicate Rejected! An official paper for "${dupLabel}" already exists in the Academic Vault. Duplicate uploads and +25⚡ Karma farming are blocked to maintain repository integrity.`, "error", "fa-triangle-exclamation");
+          showToast(`Duplicate File! "${dupLabel}" with the same PDF/link already exists. You can upload a DIFFERENT PDF for the same exam (e.g., Set B / Paper 2).`, "error", "fa-triangle-exclamation");
 
-          // Focus & filter grid to show existing paper so user can download it instead
           const searchInput = document.getElementById("pyq-search-input");
           if (searchInput) {
             searchInput.value = existingDuplicate.code || existingDuplicate.subject;
