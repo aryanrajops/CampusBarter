@@ -1,4 +1,4 @@
-/**
+﻿/**
  * CampusBarter - Frontend Logic, Auth System & Peer Barter Engine
  * Vanilla JavaScript with Supabase Cloud Database + LocalStorage State Persistence
  */
@@ -922,6 +922,8 @@ async function syncSwapsFromCloud() {
 }
 
 let swapsRealtimeChannel = null;
+let profilesRealtimeChannel = null;
+
 function setupSwapsRealtime() {
   if (swapsRealtimeChannel) return; // Prevent duplicate channels
   if (typeof DataManager !== "undefined" && typeof DataManager.getClient === "function") {
@@ -969,6 +971,60 @@ window.getStoredPeers = getStoredPeers;
 window.syncPeersFromCloud = syncPeersFromCloud;
 window.syncSwapsFromCloud = syncSwapsFromCloud;
 window.setupSwapsRealtime = setupSwapsRealtime;
+
+// ---------------------------------------------------------------------------
+// PROFILES REALTIME — Live Karma & Skills updates across all devices
+// ---------------------------------------------------------------------------
+function setupProfilesRealtime() {
+  if (profilesRealtimeChannel) return;
+  if (typeof DataManager === "undefined" || typeof DataManager.getClient !== "function") return;
+
+  const client = DataManager.getClient();
+  if (!client || typeof client.channel !== "function") return;
+
+  try {
+    profilesRealtimeChannel = client
+      .channel("campusbarter-profiles-channel")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "profiles" }, (payload) => {
+        console.log("[Supabase Realtime] New profile registered:", payload.new?.name || payload.new?.id);
+        syncPeersFromCloud();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles" }, (payload) => {
+        const updated = payload.new;
+        const prev    = payload.old;
+        if (!updated) return;
+
+        console.log("[Supabase Realtime] Profile updated:", updated.name || updated.id, "karma:", updated.karma);
+
+        syncPeersFromCloud().then(() => {
+          if (
+            typeof prev?.karma === "number" &&
+            typeof updated.karma === "number" &&
+            updated.karma !== prev.karma
+          ) {
+            const diff = updated.karma - prev.karma;
+            const peerName = updated.name || "A peer";
+            const sign = diff > 0 ? "+" : "";
+            const emoji = diff > 0 ? "⬆️" : "⬇️";
+            if (typeof showToast === "function") {
+              showToast(
+                `${emoji} ${peerName}'s Karma updated live: ${sign}${diff}⚡ (now ${updated.karma}⚡)`,
+                diff > 0 ? "success" : "info",
+                "fa-bolt-lightning",
+                3000
+              );
+            }
+          }
+        });
+      })
+      .subscribe((status) => {
+        console.log("[Supabase Realtime] Profiles channel connection status:", status);
+      });
+  } catch (e) {
+    console.warn("[Supabase Realtime] Profiles channel setup note:", e.message);
+  }
+}
+window.setupProfilesRealtime = setupProfilesRealtime;
 
 // =============================================================================
 // AI MOCK IDENTIFIER & REAL USER STATS ENGINE
@@ -4190,6 +4246,13 @@ function initApp() {
   } catch (e) { 
     console.warn("[Cloud Swap Sync]", e); 
   }
+
+  // 8. Profiles Realtime Channel — live karma & skills updates across all devices
+  try {
+    setupProfilesRealtime();
+  } catch (e) {
+    console.warn("[Profiles Realtime Setup]", e);
+  }
 }
 
 // Automatically refresh real peer profiles and barter proposals when student returns to tab
@@ -4208,6 +4271,13 @@ setInterval(() => {
     syncSwapsFromCloud();
   }
 }, 7000);
+
+// Periodic peer karma refresh every 30 seconds (fallback for students without realtime WS)
+setInterval(() => {
+  if (typeof syncPeersFromCloud === "function" && STATE.currentUser) {
+    syncPeersFromCloud();
+  }
+}, 30000);
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initApp);
