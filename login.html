@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login &amp; Sign Up | CampusBarter - Student Exchange &amp; PYQ Vault</title>
   <meta name="author" content="Aryanraj &amp; Shantanu">
-  <meta name="description" content="Sign in or register for CampusBarter. Claim 300 Karma points instantly, trade programming for calculus, and access past question papers. Created by Aryanraj &amp; Shantanu.">
+  <meta name="description"
+    content="Sign in or register for CampusBarter. Claim 300 Karma points instantly, trade programming for calculus, and access past question papers. Created by Aryanraj &amp; Shantanu.">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -14,7 +16,9 @@
   <!-- Google Fonts: Outfit (Headings) & Plus Jakarta Sans (Body) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
 
   <!-- CampusBarter Custom Glassmorphism Stylesheet -->
   <link rel="stylesheet" href="style.css">
@@ -34,6 +38,7 @@
     };
   </script>
 </head>
+
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
   <!-- Ambient Glowing Background Orbs -->
@@ -45,26 +50,32 @@
     <div class="max-w-6xl mx-auto flex items-center justify-between">
       <!-- Logo -->
       <a href="index.html" class="flex items-center gap-3 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform">
           <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
             <i class="fa-solid fa-arrows-rotate text-emerald-400 text-base"></i>
           </div>
         </div>
         <div>
-          <span class="text-xl font-extrabold tracking-tight font-heading text-white">Campus<span class="text-indigo-400">Barter</span></span>
-          <span class="block text-[10px] text-slate-400 font-medium tracking-wide">Student Knowledge & Resource Vault</span>
+          <span class="text-xl font-extrabold tracking-tight font-heading text-white">Campus<span
+              class="text-indigo-400">Barter</span></span>
+          <span class="block text-[10px] text-slate-400 font-medium tracking-wide">Student Knowledge & Resource
+            Vault</span>
         </div>
       </a>
 
       <div class="flex items-center gap-2">
         <!-- SFX Audio Control Toggle -->
-        <button id="sfx-toggle-btn" class="btn-glass p-2 sm:px-3 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-300 hover:text-white" title="Toggle Sound Effects" aria-label="Toggle Sound Effects">
+        <button id="sfx-toggle-btn"
+          class="btn-glass p-2 sm:px-3 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-300 hover:text-white"
+          title="Toggle Sound Effects" aria-label="Toggle Sound Effects">
           <i id="sfx-toggle-icon" class="fa-solid fa-volume-high text-emerald-400"></i>
           <span id="sfx-toggle-label" class="hidden sm:inline text-[11px] font-mono">SFX</span>
         </button>
 
         <!-- Back to Home Link -->
-        <a href="index.html" class="btn-glass px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 hover:text-white text-slate-300">
+        <a href="index.html"
+          class="btn-glass px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 hover:text-white text-slate-300">
           <i class="fa-solid fa-arrow-left text-blue-400"></i>
           <span>Back to Home</span>
         </a>
@@ -84,20 +95,24 @@
 
         <!-- Top Header & Subtitle -->
         <div class="text-center mb-6">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/25 text-blue-200 text-[11px] font-semibold mb-3">
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/25 text-blue-200 text-[11px] font-semibold mb-3">
             <i class="fa-solid fa-graduation-cap text-sky-400"></i>
             <span>Student Knowledge & Resource Vault</span>
           </div>
           <h1 id="auth-title" class="text-2xl sm:text-3xl font-extrabold text-white font-heading">Welcome Back</h1>
-          <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">Sign in to manage your swaps, karma, and PYQ vault.</p>
+          <p id="auth-subtitle" class="text-xs text-slate-400 mt-1">Sign in to manage your swaps, karma, and PYQ vault.
+          </p>
         </div>
 
         <!-- Auth Tabs (Log In vs Sign Up) -->
         <div class="flex items-center rounded-xl bg-slate-900/80 p-1 mb-6 border border-white/10">
-          <button id="tab-login" type="button" class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow">
+          <button id="tab-login" type="button"
+            class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 text-white shadow">
             <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Log In
           </button>
-          <button id="tab-signup" type="button" class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white">
+          <button id="tab-signup" type="button"
+            class="flex-1 py-2.5 text-xs font-bold rounded-lg transition-all text-slate-300 hover:text-white">
             <i class="fa-solid fa-sparkles mr-1.5 text-amber-400"></i> Sign Up (+300⚡)
           </button>
         </div>
@@ -108,7 +123,8 @@
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">
               <i class="fa-regular fa-envelope text-sky-400 mr-1"></i> College Email Address
             </label>
-            <input type="email" id="login-email-input" placeholder="e.g. student@college.edu" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs">
+            <input type="email" id="login-email-input" placeholder="e.g. student@college.edu"
+              class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs">
           </div>
 
           <div>
@@ -117,22 +133,29 @@
                 <i class="fa-solid fa-lock text-sky-400 mr-1"></i> Password
               </label>
               <div class="flex items-center gap-2">
-                <span class="text-[10px] text-slate-400">Demo: <strong class="text-sky-300 font-mono">1234</strong></span>
+                <span class="text-[10px] text-slate-400">Demo: <strong
+                    class="text-sky-300 font-mono">1234</strong></span>
                 <span class="text-slate-600">|</span>
-                <button type="button" onclick="openResetPasswordModal()" class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium cursor-pointer transition-colors" title="Change or reset your password">
+                <button type="button" onclick="openResetPasswordModal()"
+                  class="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium cursor-pointer transition-colors"
+                  title="Change or reset your password">
                   Forgot / Change?
                 </button>
               </div>
             </div>
             <div class="relative">
-              <input type="password" id="login-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2.5 text-xs">
-              <button type="button" onclick="togglePasswordVisibility('login-password-input', 'toggle-login-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" title="Show/Hide Password" tabindex="-1">
+              <input type="password" id="login-password-input" placeholder="••••••••"
+                class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2.5 text-xs">
+              <button type="button" onclick="togglePasswordVisibility('login-password-input', 'toggle-login-icon')"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Show/Hide Password" tabindex="-1">
                 <i id="toggle-login-icon" class="fa-regular fa-eye text-xs"></i>
               </button>
             </div>
           </div>
 
-          <button type="submit" id="login-submit-btn" class="w-full btn-primary py-3 rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+          <button type="submit" id="login-submit-btn"
+            class="w-full btn-primary py-3 rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
             <span>Log In to CampusBarter</span>
             <i class="fa-solid fa-arrow-right"></i>
           </button>
@@ -141,36 +164,43 @@
           <div class="pt-4 border-t border-white/10 text-center">
             <p class="text-xs text-slate-400">
               New to CampusBarter?
-              <a href="#signup" onclick="setTab('signup')" class="text-emerald-400 hover:text-emerald-300 font-bold ml-1 transition-colors">Create your student account &rarr;</a>
+              <a href="#signup" onclick="setTab('signup')"
+                class="text-emerald-400 hover:text-emerald-300 font-bold ml-1 transition-colors">Create your student
+                account &rarr;</a>
             </p>
           </div>
-          </form>
+        </form>
 
         <!-- FORM 2: SIGN UP -->
         <form id="page-signup-form" class="space-y-3.5 hidden" novalidate>
           <!-- Welcome Bonus Badge -->
-          <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">
+          <div
+            class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">
             <i class="fa-solid fa-sparkles text-amber-400 text-base shrink-0"></i>
             <div>
               <p class="font-bold text-amber-300">Welcome Bonus: 300 Karma Points</p>
-              <p class="text-[10px] text-amber-300/80 mt-0.5">Credited immediately to trade barters or download 20 verified PYQs!</p>
+              <p class="text-[10px] text-amber-300/80 mt-0.5">Credited immediately to trade barters or download 20
+                verified PYQs!</p>
             </div>
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
-            <input type="text" id="signup-name-input" placeholder="e.g. Diya Sharma" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="signup-name-input" placeholder="e.g. Diya Sharma"
+              class="w-full glass-input rounded-xl px-3 py-2 text-xs">
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">College Email Address</label>
-            <input type="email" id="signup-email-input" placeholder="e.g. diya.sharma@college.edu" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            <input type="email" id="signup-email-input" placeholder="e.g. diya.sharma@college.edu"
+              class="w-full glass-input rounded-xl px-3 py-2 text-xs">
           </div>
 
           <div class="grid grid-cols-2 gap-2.5">
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">Department</label>
-              <input type="text" id="signup-department-input" placeholder="e.g. Computer Science, AI/DS" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+              <input type="text" id="signup-department-input" placeholder="e.g. Computer Science, AI/DS"
+                class="w-full glass-input rounded-xl px-3 py-2 text-xs">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">Current Semester</label>
@@ -188,26 +218,34 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Skills You Can Teach (Comma-separated)</label>
-            <input type="text" id="signup-teach-input" placeholder="e.g. Java OOP, UI Wireframing, Python" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Skills You Can Teach
+              (Comma-separated)</label>
+            <input type="text" id="signup-teach-input" placeholder="e.g. Java OOP, UI Wireframing, Python"
+              class="w-full glass-input rounded-xl px-3 py-2 text-xs">
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Skills You Want to Learn (Comma-separated)</label>
-            <input type="text" id="signup-learn-input" placeholder="e.g. Docker, Calculus III, Next.js" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Skills You Want to Learn
+              (Comma-separated)</label>
+            <input type="text" id="signup-learn-input" placeholder="e.g. Docker, Calculus III, Next.js"
+              class="w-full glass-input rounded-xl px-3 py-2 text-xs">
           </div>
 
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Set Account Password</label>
             <div class="relative">
-              <input type="password" id="signup-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-xs">
-              <button type="button" onclick="togglePasswordVisibility('signup-password-input', 'toggle-signup-icon')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" title="Show/Hide Password" tabindex="-1">
+              <input type="password" id="signup-password-input" placeholder="••••••••"
+                class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-xs">
+              <button type="button" onclick="togglePasswordVisibility('signup-password-input', 'toggle-signup-icon')"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Show/Hide Password" tabindex="-1">
                 <i id="toggle-signup-icon" class="fa-regular fa-eye text-xs"></i>
               </button>
             </div>
           </div>
 
-          <button type="submit" id="signup-submit-btn" class="w-full btn-emerald py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
+          <button type="submit" id="signup-submit-btn"
+            class="w-full btn-emerald py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2">
             <span>Register & Claim 300 Karma ⚡</span>
             <i class="fa-solid fa-sparkles"></i>
           </button>
@@ -222,12 +260,15 @@
               <i id="loader-core-icon" class="fa-solid fa-arrows-rotate text-emerald-300 text-sm animate-spin"></i>
             </div>
           </div>
-          <h4 id="loader-title" class="text-sm font-bold text-white font-heading tracking-wide mb-1 text-center">Connecting to CampusBarter</h4>
+          <h4 id="loader-title" class="text-sm font-bold text-white font-heading tracking-wide mb-1 text-center">
+            Connecting to CampusBarter</h4>
           <p id="loader-subtext" class="text-xs text-blue-200 font-medium text-center">
             <span class="loading-dots">Preparing campus workspace</span>
           </p>
           <div class="w-52 bg-white/10 rounded-full h-1.5 mt-4 overflow-hidden border border-white/10">
-            <div id="loader-progress-bar" class="bg-gradient-to-r from-blue-600 via-teal-400 to-emerald-400 h-full w-1/4 transition-all duration-500"></div>
+            <div id="loader-progress-bar"
+              class="bg-gradient-to-r from-blue-600 via-teal-400 to-emerald-400 h-full w-1/4 transition-all duration-500">
+            </div>
           </div>
         </div>
 
@@ -235,20 +276,24 @@
 
       <!-- Footer Info -->
       <div class="text-center mt-6 text-[11px] text-slate-400">
-        <p>CampusBarter collegiate barter network • <a href="index.html" class="text-indigo-400 hover:underline">Explore Homepage</a></p>
+        <p>CampusBarter collegiate barter network • <a href="index.html" class="text-indigo-400 hover:underline">Explore
+            Homepage</a></p>
       </div>
 
     </div>
 
     <!-- MODAL: RESET / CHANGE PASSWORD MODAL (2-STAGE OTP VERIFICATION) -->
-    <div id="reset-password-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
+    <div id="reset-password-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal-backdrop hidden">
       <div class="glass-modal w-full max-w-md rounded-2xl p-6 relative">
-        <button type="button" onclick="closeResetPasswordModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+        <button type="button" onclick="closeResetPasswordModal()"
+          class="absolute top-4 right-4 text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
 
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center text-base shadow-lg shadow-indigo-500/25">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center text-base shadow-lg shadow-indigo-500/25">
             <i class="fa-solid fa-shield-halved"></i>
           </div>
           <div>
@@ -264,7 +309,8 @@
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">Registered College Email</label>
             <div class="relative">
-              <input type="email" id="reset-email-input" placeholder="e.g. yourname@college.edu" class="w-full glass-input rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white">
+              <input type="email" id="reset-email-input" placeholder="e.g. yourname@college.edu"
+                class="w-full glass-input rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-white">
               <i class="fa-regular fa-envelope absolute left-3 top-3 text-slate-400 text-xs"></i>
             </div>
             <p class="text-[11px] text-slate-400 mt-2">
@@ -274,10 +320,12 @@
           </div>
 
           <div class="flex items-center gap-2 pt-1">
-            <button type="button" onclick="closeResetPasswordModal()" class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
+            <button type="button" onclick="closeResetPasswordModal()"
+              class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
               Cancel
             </button>
-            <button type="button" id="reset-send-otp-btn" onclick="sendPasswordResetOtp()" class="w-2/3 btn-primary py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+            <button type="button" id="reset-send-otp-btn" onclick="sendPasswordResetOtp()"
+              class="w-2/3 btn-primary py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
               <i class="fa-solid fa-paper-plane"></i>
               <span>Send Security Code</span>
             </button>
@@ -292,15 +340,20 @@
               <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
                 <i class="fa-solid fa-envelope-circle-check text-emerald-400"></i> Verification Code Sent to Email
               </span>
-              <button type="button" onclick="backToResetStep1()" class="text-[10px] text-slate-400 hover:text-white underline">Change Email</button>
+              <button type="button" onclick="backToResetStep1()"
+                class="text-[10px] text-slate-400 hover:text-white underline">Change Email</button>
             </div>
-            <div class="font-mono text-xs text-white font-bold truncate bg-slate-900/80 px-3 py-2 rounded-xl border border-white/10 flex items-center gap-2">
+            <div
+              class="font-mono text-xs text-white font-bold truncate bg-slate-900/80 px-3 py-2 rounded-xl border border-white/10 flex items-center gap-2">
               <i class="fa-solid fa-paper-plane text-indigo-400 text-xs"></i>
               <span id="reset-display-email">student@college.edu</span>
             </div>
-            <div class="flex items-start gap-2 text-[11px] text-slate-300 leading-relaxed bg-indigo-500/10 p-2.5 rounded-xl border border-indigo-500/20">
+            <div
+              class="flex items-start gap-2 text-[11px] text-slate-300 leading-relaxed bg-indigo-500/10 p-2.5 rounded-xl border border-indigo-500/20">
               <i class="fa-solid fa-circle-info text-indigo-400 mt-0.5 shrink-0"></i>
-              <span>A secure 6-digit authentication code has been sent directly to your registered email address. Please check your <strong>Inbox</strong> (and <strong>Spam/Junk</strong> folder), then enter the code below to verify your identity.</span>
+              <span>A secure 6-digit authentication code has been sent directly to your registered email address. Please
+                check your <strong>Inbox</strong> (and <strong>Spam/Junk</strong> folder), then enter the code below to
+                verify your identity.</span>
             </div>
           </div>
 
@@ -308,12 +361,14 @@
             <div>
               <div class="flex items-center justify-between mb-1">
                 <label class="block text-xs font-semibold text-slate-300">6-Digit Verification Code (OTP)</label>
-                <button type="button" id="reset-resend-btn" onclick="resendPasswordResetOtp()" class="text-[10px] text-indigo-400 hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="button" id="reset-resend-btn" onclick="resendPasswordResetOtp()"
+                  class="text-[10px] text-indigo-400 hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed">
                   Resend Code
                 </button>
               </div>
               <div class="relative">
-                <input type="text" id="reset-otp-input" maxlength="6" placeholder="• • • • • •" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-white font-bold uppercase">
+                <input type="text" id="reset-otp-input" maxlength="6" placeholder="• • • • • •"
+                  class="w-full glass-input rounded-xl px-3.5 py-2.5 text-center text-sm font-mono tracking-widest text-white font-bold uppercase">
                 <i class="fa-solid fa-shield-halved absolute left-3 top-3 text-slate-400 text-xs"></i>
               </div>
             </div>
@@ -321,8 +376,12 @@
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">New Password (min 4 characters)</label>
               <div class="relative">
-                <input type="password" id="reset-new-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2 text-xs text-white">
-                <button type="button" onclick="togglePasswordVisibility('reset-new-password-input', 'toggle-reset-icon-1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" tabindex="-1">
+                <input type="password" id="reset-new-password-input" placeholder="••••••••"
+                  class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2 text-xs text-white">
+                <button type="button"
+                  onclick="togglePasswordVisibility('reset-new-password-input', 'toggle-reset-icon-1')"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  tabindex="-1">
                   <i id="toggle-reset-icon-1" class="fa-regular fa-eye text-xs"></i>
                 </button>
               </div>
@@ -331,18 +390,24 @@
             <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">Confirm New Password</label>
               <div class="relative">
-                <input type="password" id="reset-confirm-password-input" placeholder="••••••••" class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2 text-xs text-white">
-                <button type="button" onclick="togglePasswordVisibility('reset-confirm-password-input', 'toggle-reset-icon-2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer" tabindex="-1">
+                <input type="password" id="reset-confirm-password-input" placeholder="••••••••"
+                  class="w-full glass-input rounded-xl pl-3.5 pr-10 py-2 text-xs text-white">
+                <button type="button"
+                  onclick="togglePasswordVisibility('reset-confirm-password-input', 'toggle-reset-icon-2')"
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  tabindex="-1">
                   <i id="toggle-reset-icon-2" class="fa-regular fa-eye text-xs"></i>
                 </button>
               </div>
             </div>
 
             <div class="flex items-center gap-2 pt-2">
-              <button type="button" onclick="backToResetStep1()" class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
+              <button type="button" onclick="backToResetStep1()"
+                class="w-1/3 btn-glass py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white">
                 Back
               </button>
-              <button type="submit" id="reset-pass-submit-btn" class="w-2/3 btn-primary py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+              <button type="submit" id="reset-pass-submit-btn"
+                class="w-2/3 btn-primary py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
                 <i class="fa-solid fa-lock-open"></i>
                 <span>Verify &amp; Save</span>
               </button>
@@ -354,12 +419,15 @@
   </main>
 
   <!-- Footer -->
-  <footer class="relative z-20 py-4 text-center text-xs text-slate-500 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-2 px-4">
+  <footer
+    class="relative z-20 py-4 text-center text-xs text-slate-500 border-t border-white/5 flex flex-col sm:flex-row items-center justify-center gap-2 px-4">
     <span>© 2026 CampusBarter. Open Collegiate Knowledge &amp; Past Question Paper Exchange.</span>
     <span class="hidden sm:inline text-slate-700">•</span>
     <span class="text-slate-400 flex items-center gap-1.5">
       <span>Made by</span>
-      <span class="px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-bold">Aryanraj × Shantanu</span>
+      <span
+        class="px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-bold">Aryanraj
+        × Shantanu</span>
     </span>
   </footer>
 
@@ -460,22 +528,22 @@
     // SEED DEMO ACCOUNTS & LOCALSTORAGE CACHE INITIALIZATION
     // =========================================================================
     const SEED_DEMO_ACCOUNTS = [
-  {
-    id: "usr-aryan",
-    name: "Aryan Raj",
-    isAi: false,
-    email: "aryanraj.20j@gmail.com",
-    password: "24865",
-    department: "Computer Science & Engineering",
-    semester: "Sem 5",
-    karma: 300,
-    swapsCompleted: 3,
-    pyqsUploaded: 2,
-    downloads: 5,
-    avatar: "assets/images/avatar-default.jpg",
-    teachSkills: ["Full Stack Web Dev", "Python & DSA"],
-    learnSkills: ["UI/UX Design", "System Architecture"]
-  },
+      {
+        id: "usr-aryan",
+        name: "Aryan Raj",
+        isAi: false,
+        email: "aryanraj.20j@gmail.com",
+        password: "24865",
+        department: "Computer Science & Engineering",
+        semester: "Sem 5",
+        karma: 300,
+        swapsCompleted: 3,
+        pyqsUploaded: 2,
+        downloads: 5,
+        avatar: "assets/images/avatar-default.jpg",
+        teachSkills: ["Full Stack Web Dev", "Python & DSA"],
+        learnSkills: ["UI/UX Design", "System Architecture"]
+      },
       {
         id: "usr-1",
         name: "AI Aarav Patel",
@@ -630,9 +698,9 @@
     }
 
     // Compatibility stubs
-    function showQuantumLoader() {}
-    function updateQuantumLoader() {}
-    function hideQuantumLoader() {}
+    function showQuantumLoader() { }
+    function updateQuantumLoader() { }
+    function hideQuantumLoader() { }
 
     // =========================================================================
     // CUSTOM FORM VALIDATION (Replaces default browser tooltips)
@@ -657,7 +725,7 @@
       input.classList.remove("field-error-input");
       void input.offsetWidth; // Force reflow for instant re-shake
       input.classList.add("field-error-input");
-      
+
       // Locate insertion point (outside .relative wrapper if present)
       const anchor = input.closest(".relative") || input;
       let existing = anchor.nextElementSibling;
@@ -910,7 +978,7 @@
       setButtonLoading(signupBtn, true, "Allocating 300⚡ Karma...");
 
       try {
-        const resolvedFallback = (typeof resolveCollegiateSkills === "function") 
+        const resolvedFallback = (typeof resolveCollegiateSkills === "function")
           ? resolveCollegiateSkills({ name, email, department, teachSkills, learnSkills })
           : { teach: ["Data Structures & Algorithms", "Python Programming"], learn: ["System Architecture", "Cloud Computing"] };
 
@@ -1280,7 +1348,7 @@
                 const res2 = await sbClient.auth.verifyOtp({ email: email, token: enteredOtp, type: 'email' });
                 if (!res2.error) verifiedViaSupabase = true;
               }
-            } catch (e) {}
+            } catch (e) { }
           }
 
           if (!verifiedViaSupabase) {
@@ -1345,7 +1413,7 @@
                 localStorage.setItem("cb_current_user", JSON.stringify(u));
               }
             }
-          } catch (e) {}
+          } catch (e) { }
 
           // If DataManager online, sync password to Supabase cloud
           if (typeof DataManager !== "undefined" && typeof DataManager.updatePassword === "function") {
@@ -1426,4 +1494,5 @@
     window.addEventListener("hashchange", checkEmailRecoveryLink);
   </script>
 </body>
+
 </html>

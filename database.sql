@@ -597,13 +597,72 @@ END;
 $$;
 
 -- =============================================================================
--- SUPABASE REALTIME PUBLICATION CONFIG
--- Run these in Supabase SQL Editor to enable live WebSocket broadcasts for
--- cross-device barter proposals AND real-time karma/skills observation.
+-- SUPABASE REALTIME & RLS PRODUCTION CONFIG (COPY & RUN IN SUPABASE SQL EDITOR)
+-- Fixes real-time sync for Swaps, Profiles, and PYQs across all accounts and devices
 -- =============================================================================
 
--- Enable realtime for swaps table (cross-device barter proposals)
-ALTER PUBLICATION supabase_realtime ADD TABLE public.swaps;
+-- 1. DROP RESTRICTIVE POLICIES
+DROP POLICY IF EXISTS "Enable read access for all users on swaps" ON public.swaps;
+DROP POLICY IF EXISTS "Enable insert access for all users on swaps" ON public.swaps;
+DROP POLICY IF EXISTS "Enable update access for all users on swaps" ON public.swaps;
+DROP POLICY IF EXISTS "Enable delete access for all users on swaps" ON public.swaps;
+DROP POLICY IF EXISTS "Users can view swaps they are part of" ON public.swaps;
+DROP POLICY IF EXISTS "Users can create swaps where they are requester" ON public.swaps;
+DROP POLICY IF EXISTS "Users can update swaps they are part of" ON public.swaps;
 
--- Enable realtime for profiles table (live karma & skills updates across devices)
-ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
+DROP POLICY IF EXISTS "PYQs are viewable by authenticated users" ON public.pyqs;
+DROP POLICY IF EXISTS "Authenticated users can insert PYQs" ON public.pyqs;
+DROP POLICY IF EXISTS "Uploaders can update their own PYQs" ON public.pyqs;
+DROP POLICY IF EXISTS "Enable read access for all on pyqs" ON public.pyqs;
+DROP POLICY IF EXISTS "Enable insert access for all on pyqs" ON public.pyqs;
+DROP POLICY IF EXISTS "Enable update access for all on pyqs" ON public.pyqs;
+
+DROP POLICY IF EXISTS "Public profiles are viewable by all users" ON public.profiles;
+DROP POLICY IF EXISTS "Enable profile update for all users" ON public.profiles;
+
+-- 2. CREATE OPEN ACCESS POLICIES (Allow client browsers to propose swaps and upload papers)
+CREATE POLICY "Enable read access for all users on swaps" 
+ON public.swaps FOR SELECT USING (true);
+
+CREATE POLICY "Enable insert access for all users on swaps" 
+ON public.swaps FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Enable update access for all users on swaps" 
+ON public.swaps FOR UPDATE USING (true) WITH CHECK (true);
+
+CREATE POLICY "Enable delete access for all users on swaps" 
+ON public.swaps FOR DELETE USING (true);
+
+CREATE POLICY "Enable read access for all on pyqs" 
+ON public.pyqs FOR SELECT USING (true);
+
+CREATE POLICY "Enable insert access for all on pyqs" 
+ON public.pyqs FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Enable update access for all on pyqs" 
+ON public.pyqs FOR UPDATE USING (true) WITH CHECK (true);
+
+CREATE POLICY "Public profiles are viewable by all users" 
+ON public.profiles FOR SELECT USING (true);
+
+CREATE POLICY "Enable profile update for all users" 
+ON public.profiles FOR UPDATE USING (true) WITH CHECK (true);
+
+-- 3. ADD ALL THREE TABLES TO SUPABASE REALTIME PUBLICATION
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'swaps') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.swaps;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'profiles') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'pyqs') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.pyqs;
+    END IF;
+END $$;
+
+-- 4. SET REPLICA IDENTITY FULL (broadcasts complete row data to real-time clients)
+ALTER TABLE public.profiles REPLICA IDENTITY FULL;
+ALTER TABLE public.swaps REPLICA IDENTITY FULL;
+ALTER TABLE public.pyqs REPLICA IDENTITY FULL;
