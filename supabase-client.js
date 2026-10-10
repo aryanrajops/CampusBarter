@@ -732,6 +732,64 @@ const DataManager = {
     }
   },
 
+  /**
+   * Fetch All Published Exam Papers from Supabase Cloud
+   * Enables cross-device real-time synchronization so every student immediately
+   * sees papers uploaded by peers across the college.
+   */
+  async getPYQs() {
+    if (this.isOnline() && sbClient) {
+      try {
+        const { data, error } = await sbClient
+          .from("pyqs")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.warn("[CampusBarter Backend] Cloud PYQ fetch warning:", error.message);
+          return [];
+        }
+        return (data || []).map(p => this.normalizePYQ(p));
+      } catch (err) {
+        console.warn("[CampusBarter Backend] Cloud PYQ fetch exception:", err.message);
+        return [];
+      }
+    }
+    return [];
+  },
+
+  normalizePYQ(p) {
+    if (!p) return null;
+    const allAccounts = JSON.parse(localStorage.getItem("cb_accounts") || "[]");
+    let uploaderAcc = allAccounts.find(a => a.id === p.uploader_id);
+    if (!uploaderAcc && typeof window !== "undefined" && window.STATE && Array.isArray(window.STATE.peers)) {
+      uploaderAcc = window.STATE.peers.find(peer => peer.id === p.uploader_id);
+    }
+    const uploaderName = uploaderAcc ? uploaderAcc.name : (p.uploader_name || "Student Peer");
+    const uploaderAv = uploaderAcc ? (uploaderAcc.avatar || "assets/images/avatar-default.jpg") : "assets/images/avatar-default.jpg";
+
+    return {
+      id: p.id,
+      subject: p.subject || "General Academic",
+      code: p.code || "GEN-101",
+      semester: p.semester || "Sem 1",
+      examType: p.exam_type || p.examType || "End Sem",
+      year: parseInt(p.year, 10) || new Date().getFullYear(),
+      fileSize: p.file_size || p.fileSize || "2.4 MB",
+      pages: p.pages || 4,
+      downloads: p.downloads || 0,
+      rating: 5.0,
+      fileUrl: p.file_url || p.fileUrl || "https://drive.google.com/drive/folders/1be2SNRssxdzlKLnCIMjGjkOh7UeJ_N9X?usp=drive_link",
+      uploaderId: p.uploader_id,
+      uploader: uploaderName,
+      uploaderAvatar: uploaderAv,
+      isAi: false,
+      isProtected: true,
+      hasSolutions: p.has_solutions ?? false,
+      createdAt: p.created_at || new Date().toISOString()
+    };
+  },
+
   // ---------------------------------------------------------------------------
   // OFFLINE QUEUE & AUTO-SYNC ENGINE
   // ---------------------------------------------------------------------------

@@ -906,6 +906,12 @@ async function syncSwapsFromCloud() {
       } else {
         currentList.unshift(mappedSwap);
         swapsUpdated = true;
+        if (!isReq && mappedSwap.status === "PENDING") {
+          if (typeof showToast === "function") {
+            showToast(`🔔 New Barter Proposal from ${escapeHTML(mappedSwap.userName || "a peer")}!`, "success", "fa-bell", 5000);
+          }
+          if (window.SoundFX) SoundFX.playSuccess();
+        }
       }
     });
 
@@ -1005,6 +1011,101 @@ function setupProfilesRealtime() {
 }
 
 window.setupProfilesRealtime = setupProfilesRealtime;
+
+// =============================================================================
+// DYNAMIC CLOUD PYQ SYNCHRONIZATION (Supabase Cloud + LocalStorage)
+// Fetches academic vault papers uploaded across all devices so all students
+// immediately see new question papers in real-time.
+// =============================================================================
+async function syncPYQsFromCloud() {
+  if (typeof DataManager === "undefined" || !DataManager.isOnline() || typeof DataManager.getPYQs !== "function") {
+    return;
+  }
+
+  try {
+    const cloudPYQs = await DataManager.getPYQs();
+    if (!Array.isArray(cloudPYQs) || cloudPYQs.length === 0) return;
+
+    let pyqsUpdated = false;
+    const currentList = [...STATE.pyqs];
+
+    cloudPYQs.forEach(cp => {
+      // Find if this paper is already in local list (match by id, or exact code + year + examType + subject)
+      const existingIdx = currentList.findIndex(p => 
+        p.id === cp.id || 
+        (p.code === cp.code && String(p.year) === String(cp.year) && p.examType === cp.examType && p.subject === cp.subject)
+      );
+
+      if (existingIdx !== -1) {
+        // Update downloads or metadata from cloud
+        const cur = currentList[existingIdx];
+        if (cur.downloads !== cp.downloads || cur.fileUrl !== cp.fileUrl) {
+          currentList[existingIdx] = { ...cur, ...cp };
+          pyqsUpdated = true;
+        }
+      } else {
+        // Prepend newly discovered real student paper at the top of vault
+        currentList.unshift(cp);
+        pyqsUpdated = true;
+      }
+    });
+
+    if (pyqsUpdated) {
+      STATE.pyqs = currentList;
+      saveStoredPYQs(STATE.pyqs);
+      if (typeof filterAndRenderPYQs === "function") {
+        filterAndRenderPYQs();
+      }
+      if (typeof updateGlobalStats === "function") {
+        updateGlobalStats();
+      }
+    }
+  } catch (err) {
+    console.warn("[CampusBarter Backend] Cloud PYQ sync warning:", err);
+  }
+}
+
+let pyqsRealtimeChannel = null;
+
+function setupPYQsRealtime() {
+  if (pyqsRealtimeChannel) return; // Prevent duplicate channels
+  if (typeof DataManager === "undefined" || typeof DataManager.getClient !== "function") return;
+
+  const client = DataManager.getClient();
+  if (!client || typeof client.channel === "function" === false) return;
+
+  try {
+    pyqsRealtimeChannel = client
+      .channel("campusbarter-pyqs-channel")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "pyqs" }, (payload) => {
+        console.log("[Supabase Realtime] New PYQ uploaded to Academic Vault:", payload.new?.subject);
+        syncPYQsFromCloud().then(() => {
+          const subject = payload.new?.subject || "Exam Paper";
+          const code = payload.new?.code || "";
+          if (typeof showToast === "function") {
+            showToast(`📄 New PYQ Available: ${subject} (${code})! Added live to Academic Vault.`, "success", "fa-file-circle-check", 4000);
+            if (window.SoundFX) SoundFX.playPop();
+          }
+        });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "pyqs" }, (payload) => {
+        console.log("[Supabase Realtime] PYQs table changed:", payload.eventType);
+        syncPYQsFromCloud();
+      })
+      .subscribe((status) => {
+        console.log("[Supabase Realtime] PYQs channel connection status:", status);
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          pyqsRealtimeChannel = null;
+        }
+      });
+  } catch (e) {
+    console.warn("[Supabase Realtime] PYQs channel setup note:", e.message);
+    pyqsRealtimeChannel = null;
+  }
+}
+
+window.syncPYQsFromCloud = syncPYQsFromCloud;
+window.setupPYQsRealtime = setupPYQsRealtime;
 
 
 const STATE = {
@@ -4250,15 +4351,26 @@ function initApp() {
   } catch (e) {
     console.warn("[Profiles Realtime Setup]", e);
   }
+
+  // 9. PYQs Cloud Sync & Realtime Channel — live exam papers across all devices
+  try {
+    syncPYQsFromCloud();
+    setupPYQsRealtime();
+  } catch (e) {
+    console.warn("[PYQs Realtime Setup]", e);
+  }
 }
 
-// Automatically refresh real peer profiles and barter proposals when student returns to tab
+// Automatically refresh real peer profiles, barter proposals, and papers when student returns to tab
 window.addEventListener("focus", () => {
   if (typeof syncPeersFromCloud === "function") {
     syncPeersFromCloud();
   }
   if (typeof syncSwapsFromCloud === "function") {
     syncSwapsFromCloud();
+  }
+  if (typeof syncPYQsFromCloud === "function") {
+    syncPYQsFromCloud();
   }
 });
 
@@ -4268,6 +4380,13 @@ setInterval(() => {
     syncSwapsFromCloud();
   }
 }, 7000);
+
+// Periodic PYQ academic vault refresh every 12 seconds
+setInterval(() => {
+  if (typeof syncPYQsFromCloud === "function") {
+    syncPYQsFromCloud();
+  }
+}, 12000);
 
 // Periodic peer karma refresh every 30 seconds (fallback for students without realtime WS)
 setInterval(() => {
